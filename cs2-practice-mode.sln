@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cs2PracticeMode", "src\Cs2PracticeMode.csproj", "{C5434EE7-5B11-485A-AFC5-C92147C5471E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cs2PracticeModeTests", "tests\Cs2PracticeModeTests.csproj", "{BA26D87C-5C48-456B-852D-0A002B5513DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C5434EE7-5B11-485A-AFC5-C92147C5471E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5434EE7-5B11-485A-AFC5-C92147C5471E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5434EE7-5B11-485A-AFC5-C92147C5471E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5434EE7-5B11-485A-AFC5-C92147C5471E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA26D87C-5C48-456B-852D-0A002B5513DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA26D87C-5C48-456B-852D-0A002B5513DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA26D87C-5C48-456B-852D-0A002B5513DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA26D87C-5C48-456B-852D-0A002B5513DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <RootNamespace>Cs2PracticeMode</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CounterStrikeSharp.API" Version="1.0.193">
+            <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0">
+            <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0">
+            <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Dapper" Version="2.1.35"/>
+        <PackageReference Include="ErrorOr" Version="1.10.0"/>
+        <PackageReference Include="Npgsql" Version="8.0.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Cs2PracticeMode.cfg">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+</Project>
