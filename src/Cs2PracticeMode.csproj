@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CounterStrikeSharp.API" Version="1.0.193">
+        <PackageReference Include="CounterStrikeSharp.API" Version="1.0.194">
             <IncludeAssets>compile</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0">
@@ -27,6 +27,10 @@
         <None Update="Cs2PracticeMode.cfg">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services\2\" />
     </ItemGroup>
 
 </Project>

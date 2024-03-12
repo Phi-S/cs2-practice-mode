@@ -1,8 +1,9 @@
-﻿namespace Cs2PracticeMode.Services;
+namespace Cs2PracticeMode.Services;
 
 public enum LoadOrder
 {
-    First = 0,
-    Second = 1,
-    Last = 999
+    Highest = 0,
+    High = 1,
+    AboveNormal = 2,
+    Normal = 3
 }

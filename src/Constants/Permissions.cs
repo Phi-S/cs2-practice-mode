@@ -42,7 +42,7 @@ public static class Permissions
 
         public static readonly string FlashMode = GetFlag("flash");
 
-        public static readonly string ReadGlobalGrenades = GetFlag("nades");
+        public static readonly string ReadGrenades = GetFlag("nades");
         public static readonly string WriteGrenades = GetFlag("writenades");
 
         public static readonly string Rethrow = GetFlag("rethrow");

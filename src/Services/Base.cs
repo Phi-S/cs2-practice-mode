@@ -4,7 +4,7 @@ namespace Cs2PracticeMode.Services;
 
 public abstract class Base
 {
-    protected Base(LoadOrder loadOrder = LoadOrder.Last)
+    protected Base(LoadOrder loadOrder = LoadOrder.Normal)
     {
         LoadOrder = loadOrder;
     }

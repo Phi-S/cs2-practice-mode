@@ -1,32 +1,32 @@
 ﻿using System.Reflection;
 using CounterStrikeSharp.API.Core;
 using Cs2PracticeMode.Services;
-using Cs2PracticeMode.Services.First.PluginConfigFolder;
-using Cs2PracticeMode.Services.Last.AliasFolder;
-using Cs2PracticeMode.Services.Last.BlindTimeFolder;
-using Cs2PracticeMode.Services.Last.BotFolder;
-using Cs2PracticeMode.Services.Last.BreakPropsFolder;
-using Cs2PracticeMode.Services.Last.ChangeMapFolder;
-using Cs2PracticeMode.Services.Last.ClearGrenadesFolder;
-using Cs2PracticeMode.Services.Last.CountdownFolder;
-using Cs2PracticeMode.Services.Last.FakeRconFolder;
-using Cs2PracticeMode.Services.Last.FlashFolder;
-using Cs2PracticeMode.Services.Last.GameConfigFolder;
-using Cs2PracticeMode.Services.Last.GrenadeMenuFolder;
-using Cs2PracticeMode.Services.Last.LastThrownGrenadeFolder;
-using Cs2PracticeMode.Services.Last.NoFlashFolder;
-using Cs2PracticeMode.Services.Last.PlayerDamageFolder;
-using Cs2PracticeMode.Services.Last.PlayerPermissionsFolder;
-using Cs2PracticeMode.Services.Last.SettingsFolder;
-using Cs2PracticeMode.Services.Last.SmokeColorFolder;
-using Cs2PracticeMode.Services.Last.SmokeFlyTimeFolder;
-using Cs2PracticeMode.Services.Last.SpawnFolder;
-using Cs2PracticeMode.Services.Last.SwapTeamsFolder;
-using Cs2PracticeMode.Services.Last.TimerFolder;
-using Cs2PracticeMode.Services.Second.CommandFolder;
-using Cs2PracticeMode.Services.Second.GrenadeStorageFolder;
-using Cs2PracticeMode.Services.Second.MessagingFolder;
-using Cs2PracticeMode.Services.Second.SettingsStorageFolder;
+using Cs2PracticeMode.Services._0.PluginConfigFolder;
+using Cs2PracticeMode.Services._1.AliasStorageFolder;
+using Cs2PracticeMode.Services._1.GrenadeStorageFolder;
+using Cs2PracticeMode.Services._1.SettingsStorageFolder;
+using Cs2PracticeMode.Services._2.CommandFolder;
+using Cs2PracticeMode.Services._2.MessagingFolder;
+using Cs2PracticeMode.Services._3.BlindTimeFolder;
+using Cs2PracticeMode.Services._3.BotFolder;
+using Cs2PracticeMode.Services._3.BreakPropsFolder;
+using Cs2PracticeMode.Services._3.ChangeMapFolder;
+using Cs2PracticeMode.Services._3.ClearGrenadesFolder;
+using Cs2PracticeMode.Services._3.CountdownFolder;
+using Cs2PracticeMode.Services._3.FakeRconFolder;
+using Cs2PracticeMode.Services._3.FlashFolder;
+using Cs2PracticeMode.Services._3.GameConfigFolder;
+using Cs2PracticeMode.Services._3.GrenadeMenuFolder;
+using Cs2PracticeMode.Services._3.LastThrownGrenadeFolder;
+using Cs2PracticeMode.Services._3.NoFlashFolder;
+using Cs2PracticeMode.Services._3.PlayerDamageFolder;
+using Cs2PracticeMode.Services._3.PlayerPermissionsFolder;
+using Cs2PracticeMode.Services._3.SettingsFolder;
+using Cs2PracticeMode.Services._3.SmokeColorFolder;
+using Cs2PracticeMode.Services._3.SmokeFlyTimeFolder;
+using Cs2PracticeMode.Services._3.SpawnFolder;
+using Cs2PracticeMode.Services._3.SwapTeamsFolder;
+using Cs2PracticeMode.Services._3.TimerFolder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -36,19 +36,21 @@ public class Cs2PracModeServiceCollection : IPluginServiceCollection<Cs2Practice
 {
     public void ConfigureServices(IServiceCollection serviceCollection)
     {
-        // First
+        // 0
         serviceCollection.AddSingleton<PluginConfigService>();
 
-        // Second
-        serviceCollection.AddSingleton<CommandService>();
-        serviceCollection.AddSingleton<MessagingService>();
+        // 1
         serviceCollection.AddSingleton<SettingsStorageService>();
+        serviceCollection.AddSingleton<AliasStorageService>();
         serviceCollection.AddSingleton<GrenadeStorageService>();
 
-        // Last
+        // 3
+        serviceCollection.AddSingleton<CommandService>();
+        serviceCollection.AddSingleton<MessagingService>();
+        
+        // 4
         serviceCollection.AddSingleton<SetPlayerPermissionsService>();
         serviceCollection.AddSingleton<GameConfigService>();
-        serviceCollection.AddSingleton<AliasService>();
         serviceCollection.AddSingleton<FakeRconService>();
         serviceCollection.AddSingleton<SettingsMenuService>();
         serviceCollection.AddSingleton<BlindTimeService>();
@@ -154,6 +156,7 @@ public class Cs2PracticeMode : BasePlugin
             .GetTypes();
 
         foreach (var type in allTypesInAssembly)
+        {
             if (type is { IsClass: true, IsAbstract: false } &&
                 type.IsSubclassOf(typeof(T)))
             {
@@ -163,6 +166,7 @@ public class Cs2PracticeMode : BasePlugin
                     result.Add(serviceForType);
                 }
             }
+        }
 
         return result;
     }

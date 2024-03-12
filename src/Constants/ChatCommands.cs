@@ -3,9 +3,9 @@
 public static class ChatCommands
 {
     public const string Alias = "alias";
-    public const string RemoveAlias = "ralias";
-    public const string GlobalAlias = "galias";
-    public const string RemoveGlobalAlias = "rgalias";
+    public const string RemoveAlias = "removealias";
+    public const string GlobalAlias = "globalalias";
+    public const string RemoveGlobalAlias = "removeglobalalias";
 
     public const string Bot = "bot";
     public const string TBot = "tbot";
@@ -37,24 +37,21 @@ public static class ChatCommands
     public const string StopFlashMode = "stop";
 
     public const string GrenadeMenu = "nades";
+
     public const string SaveGrenade = "save";
     public const string DeleteGrenade = "delete";
-    public const string PublishGrenade = "publish";
 
+    public const string SelectGrenade = "select";
     public const string FindGrenade = "find";
-    public const string FindPersonalGrenade = "pfind";
-
-    public const string EditGrenade = "editnade";
     public const string RenameGrenade = "rename";
     public const string GrenadeDescription = "desc";
-
     public const string AddTagToGrenade = "addtag";
     public const string RemoveGrenadeTag = "removetag";
-    public const string ShowGlobalGrenadeTags = "tags";
-    public const string ShowPersonalGrenadeTags = "ptags";
+    public const string ShowGrenadeTags = "tags";
     public const string DeleteGrenadeTag = "deletetag";
     public const string ClearGrenadeTags = "cleartags";
 
+    public const string Throw = "rethrow";
     public const string Rethrow = "rethrow";
     public const string Last = "last";
     public const string Forward = "forward";
