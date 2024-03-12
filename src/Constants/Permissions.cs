@@ -2,7 +2,7 @@
 
 public static class Permissions
 {
-    private const string Domain = "cs2pracmode";
+    private const string Domain = "Cs2PracticeMode";
 
     private static string GetFlag(string flag)
     {
@@ -22,9 +22,9 @@ public static class Permissions
     public static class Flags
     {
         public static readonly string Alias = GetFlag("alias");
-        public static readonly string RemoveAlias = GetFlag("ralias");
-        public static readonly string GlobalAlias = GetFlag("galias");
-        public static readonly string RemoveGlobalAlias = GetFlag("ralias");
+        public static readonly string RemoveAlias = GetFlag("removealias");
+        public static readonly string GlobalAlias = GetFlag("globalalias");
+        public static readonly string RemoveGlobalAlias = GetFlag("removeglobalalias");
 
         public static readonly string Bot = GetFlag("bot");
         public static readonly string ClearBots = GetFlag("ClearBots");

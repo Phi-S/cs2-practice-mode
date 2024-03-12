@@ -7,7 +7,7 @@ public class LocalStorageCollection<T> : IStorageCollection<T> where T : IDataCo
 {
     private readonly string _dataDirectory;
     private readonly string _idFilePath;
-    private readonly object _idLock = new();
+    private readonly object _lock = new();
 
     public LocalStorageCollection(string storageDirectory)
     {
@@ -32,69 +32,104 @@ public class LocalStorageCollection<T> : IStorageCollection<T> where T : IDataCo
 
     public ErrorOr<List<T>> GetAll()
     {
-        var result = new List<T>();
-        var files = Directory.GetFiles(_dataDirectory);
-        foreach (var file in files)
+        lock (_lock)
         {
-            var json = File.ReadAllText(file);
-            var dataObj = StorageHelper.Deserialize<T>(json);
-            if (dataObj.IsError)
+            var result = new List<T>();
+            var files = Directory.GetFiles(_dataDirectory);
+            foreach (var file in files)
             {
-                return Errors.Fail($"{dataObj.ErrorMessage()} \"{file}\"");
+                var json = File.ReadAllText(file);
+                var dataObj = StorageHelper.Deserialize<T>(json);
+                if (dataObj.IsError)
+                {
+                    return Errors.Fail($"{dataObj.ErrorMessage()} \"{file}\"");
+                }
+
+                result.Add(dataObj.Value);
             }
 
-            result.Add(dataObj.Value);
+            return result;
         }
-
-        return result;
     }
 
     public ErrorOr<T> Get(uint id)
     {
-        var filePath = GetDataFilePath(id);
-        if (File.Exists(filePath) == false)
+        lock (_lock)
         {
-            return Error.NotFound(description: $"File not found. \"{filePath}\"");
-        }
+            var filePath = GetDataFilePath(id);
+            if (File.Exists(filePath) == false)
+            {
+                return Error.NotFound(description: $"File not found. \"{filePath}\"");
+            }
 
-        var json = File.ReadAllText(filePath);
-        var data = StorageHelper.Deserialize<T>(json);
-        if (data.IsError)
-        {
-            return Errors.Fail($"{data.ErrorMessage()} \"{filePath}\"");
-        }
+            var json = File.ReadAllText(filePath);
+            var data = StorageHelper.Deserialize<T>(json);
+            if (data.IsError)
+            {
+                return Errors.Fail($"{data.ErrorMessage()} \"{filePath}\"");
+            }
 
-        return data.Value;
+            return data.Value;
+        }
     }
 
     public ErrorOr<T> Add(T data)
     {
-        if (File.Exists(_idFilePath) == false)
+        lock (_lock)
         {
-            return Error.NotFound(description: $"Id file not found. \"{_idFilePath}\"");
+            if (File.Exists(_idFilePath) == false)
+            {
+                return Error.NotFound(description: $"Id file not found. \"{_idFilePath}\"");
+            }
+
+            lock (_lock)
+            {
+                var currentIdString = File.ReadAllText(_idFilePath);
+                if (uint.TryParse(currentIdString, out var currentId) == false)
+                {
+                    return Errors.Fail($"Failed to parse current id. \"{currentIdString}\"");
+                }
+
+                var newId = currentId + 1;
+                data.Id = newId;
+
+                if (Directory.Exists(_dataDirectory) == false)
+                {
+                    return Error.NotFound($"Data directory not found. \"{_dataDirectory}\"");
+                }
+
+                var filePath = GetDataFilePath(newId);
+                if (File.Exists(filePath))
+                {
+                    return Errors.Fail($"Data file already exists. \"{filePath}\"");
+                }
+
+                var json = StorageHelper.Serialize(data);
+                if (json.IsError)
+                {
+                    return json.FirstError;
+                }
+
+                File.WriteAllText(filePath, json.Value);
+
+                // update the id after successful data file creation
+                File.WriteAllText(_idFilePath, newId.ToString());
+                return data;
+            }
         }
+    }
 
-        lock (_idLock)
+    public ErrorOr<Success> Update(T data)
+    {
+        lock (_lock)
         {
-            var currentIdString = File.ReadAllText(_idFilePath);
-            if (uint.TryParse(currentIdString, out var currentId) == false)
+            var filePath = GetDataFilePath(data.Id);
+            if (File.Exists(filePath) == false)
             {
-                return Errors.Fail($"Failed to parse current id. \"{currentIdString}\"");
+                return Errors.Fail($"File dose not exist. \"{filePath}\"");
             }
 
-            var newId = currentId + 1;
-            data.Id = newId;
-
-            if (Directory.Exists(_dataDirectory) == false)
-            {
-                return Error.NotFound($"Data directory not found. \"{_dataDirectory}\"");
-            }
-
-            var filePath = GetDataFilePath(newId);
-            if (File.Exists(filePath))
-            {
-                return Errors.Fail($"Data file already exists. \"{filePath}\"");
-            }
+            data.UpdatedUtc = DateTime.UtcNow;
 
             var json = StorageHelper.Serialize(data);
             if (json.IsError)
@@ -103,49 +138,32 @@ public class LocalStorageCollection<T> : IStorageCollection<T> where T : IDataCo
             }
 
             File.WriteAllText(filePath, json.Value);
-
-            // update the id after successful data file creation
-            File.WriteAllText(_idFilePath, newId.ToString());
-            return data;
+            return Result.Success;
         }
-    }
-
-    public ErrorOr<Success> Update(T data)
-    {
-        var filePath = GetDataFilePath(data.Id);
-        if (File.Exists(filePath) == false)
-        {
-            return Errors.Fail($"File dose not exist. \"{filePath}\"");
-        }
-
-        data.UpdatedUtc = DateTime.UtcNow;
-
-        var json = StorageHelper.Serialize(data);
-        if (json.IsError)
-        {
-            return json.FirstError;
-        }
-
-        File.WriteAllText(filePath, json.Value);
-        return Result.Success;
     }
 
     public ErrorOr<Deleted> Delete(uint id)
     {
-        var filePath = GetDataFilePath(id);
-        if (File.Exists(filePath) == false)
+        lock (_lock)
         {
-            return Errors.Fail($"File dose not exist. \"{filePath}\"");
-        }
+            var filePath = GetDataFilePath(id);
+            if (File.Exists(filePath) == false)
+            {
+                return Errors.Fail($"File dose not exist. \"{filePath}\"");
+            }
 
-        File.Delete(filePath);
-        return Result.Deleted;
+            File.Delete(filePath);
+            return Result.Deleted;
+        }
     }
 
     public bool Exist(uint id)
     {
-        var filePath = GetDataFilePath(id);
-        return File.Exists(filePath);
+        lock (_lock)
+        {
+            var filePath = GetDataFilePath(id);
+            return File.Exists(filePath);
+        }
     }
 
     private string GetDataFilePath(uint id)

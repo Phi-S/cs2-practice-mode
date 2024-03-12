@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using Cs2PracticeMode.Constants;
@@ -15,7 +16,9 @@ public class TimerService : Base
     private readonly ILogger<TimerService> _logger;
     private readonly MessagingService _messagingService;
 
-    private readonly ConcurrentDictionary<CCSPlayerController, (DateTime startDate, HtmlPrint print)> _timers = new();
+    private ConcurrentDictionary<CCSPlayerController, (DateTime? startDate, HtmlPrint print)> Timer { get; } = new();
+    private ConcurrentDictionary<CCSPlayerController, (DateTime startDate, HtmlPrint print)> Timer2 { get; } = new();
+
     private Task? _backgroundTask;
     private CancellationTokenSource _cancellationTokenSource = new();
 
@@ -34,6 +37,12 @@ public class TimerService : Base
 
         _commandService.RegisterCommand(ChatCommands.Timer,
             CommandHandlerTimer,
+            ArgOption.NoArgs(
+                "Start timer. If you start moving, the timer will start. If you stop moving, the timer will stop"),
+            Permissions.Flags.Timer);
+
+        _commandService.RegisterCommand(ChatCommands.Timer2,
+            CommandHandlerTimer2,
             ArgOption.NoArgs("Start or stop timer"),
             Permissions.Flags.Timer);
 
@@ -43,12 +52,12 @@ public class TimerService : Base
     public override void Unload(BasePlugin plugin)
     {
         _cancellationTokenSource.Cancel();
-        foreach (var timer in _timers)
+        foreach (var timer in Timer2)
         {
             _messagingService.HideCenterHtml(timer.Key, timer.Value.print);
         }
 
-        _timers.Clear();
+        Timer2.Clear();
 
         if (_backgroundTask is not null && _backgroundTask.Status == TaskStatus.Running)
         {
@@ -60,18 +69,47 @@ public class TimerService : Base
 
     private ErrorOr<Success> CommandHandlerTimer(CCSPlayerController player, CommandInfo commandInfo)
     {
-        var startStopResult = StartStop(player);
-        if (startStopResult.IsError)
+        if (Timer2.ContainsKey(player))
         {
-            return startStopResult.FirstError;
+            return Errors.Fail("Another timer is already running");
         }
 
+        if (Timer.ContainsKey(player))
+        {
+            Hide(player);
+            _messagingService.MsgToPlayerChat(player,
+                $"Timer stopped");
+            return Result.Success;
+        }
+
+        var printResult = _messagingService.ShowCenterHtml(player, GetTimerText(DateTime.UtcNow));
+        if (printResult.IsError)
+        {
+            return Errors.Fail($"Failed to start timer. {printResult.ErrorMessage()}");
+        }
+
+        if (Timer.TryAdd(player, (null, printResult.Value)) == false)
+        {
+            _logger.LogError(
+                "Failed to start timer for player \"{Player}\". TryAdd returned false. This should never happen",
+                player.PlayerName);
+            _messagingService.HideCenterHtml(player, printResult.Value);
+            return Errors.Fail("Failed to start timer");
+        }
+
+        _messagingService.MsgToPlayerChat(player,
+            "Start moving to start the timer. If you stop moving, the timer will stop");
         return Result.Success;
     }
 
-    private ErrorOr<Success> StartStop(CCSPlayerController player)
+    private ErrorOr<Success> CommandHandlerTimer2(CCSPlayerController player, CommandInfo commandInfo)
     {
-        if (_timers.TryGetValue(player, out var currentTimer))
+        if (Timer.ContainsKey(player))
+        {
+            return Errors.Fail("Another timer is already running");
+        }
+
+        if (Timer2.TryGetValue(player, out var currentTimer))
         {
             Hide(player);
             _messagingService.MsgToPlayerChat(player,
@@ -86,7 +124,7 @@ public class TimerService : Base
                 return Errors.Fail($"Failed to start timer. {printResult.ErrorMessage()}");
             }
 
-            if (_timers.TryAdd(player, (startDate, printResult.Value)) == false)
+            if (Timer2.TryAdd(player, (startDate, printResult.Value)) == false)
             {
                 _logger.LogError(
                     "Failed to start timer for player \"{Player}\". TryAdd returned false. This should never happen",
@@ -103,9 +141,14 @@ public class TimerService : Base
 
     private void Hide(CCSPlayerController player)
     {
-        if (_timers.TryRemove(player, out var removedPlayerTimer))
+        if (Timer.TryRemove(player, out var removedPlayerTimer))
         {
             _messagingService.HideCenterHtml(player, removedPlayerTimer.print);
+        }
+
+        if (Timer2.TryRemove(player, out var removedPlayerTimer2))
+        {
+            _messagingService.HideCenterHtml(player, removedPlayerTimer2.print);
         }
     }
 
@@ -120,8 +163,64 @@ public class TimerService : Base
         {
             while (_cancellationTokenSource.IsCancellationRequested == false)
             {
-                await Task.Delay(100, _cancellationTokenSource.Token);
-                foreach (var player in _timers.Keys)
+                await Task.Delay(20, _cancellationTokenSource.Token);
+
+                await Server.NextFrameAsync(() =>
+                {
+                    foreach (var player in Timer.Keys)
+                    {
+                        if (player.IsValid == false ||
+                            player.PlayerPawn.IsValid == false ||
+                            player.Team == CsTeam.None ||
+                            player.Team == CsTeam.Spectator)
+                        {
+                            Hide(player);
+                            continue;
+                        }
+
+                        if (Timer.TryGetValue(player, out var timer) == false)
+                        {
+                            _logger.LogError(
+                                "Player exist as key but TryGetValue returned false. This should never happen");
+                            continue;
+                        }
+
+
+                        var playerButtons = player.Buttons;
+                        if ((playerButtons & PlayerButtons.Forward) != 0 ||
+                            (playerButtons & PlayerButtons.Back) != 0 ||
+                            (playerButtons & PlayerButtons.Left) != 0 ||
+                            (playerButtons & PlayerButtons.Right) != 0 ||
+                            (playerButtons & PlayerButtons.Moveleft) != 0 ||
+                            (playerButtons & PlayerButtons.Moveright) != 0)
+                        {
+                            if (timer.startDate is null)
+                            {
+                                Timer[player] = (DateTime.UtcNow, timer.print);
+                                timer.print.Content = GetTimerText(DateTime.UtcNow);
+                            }
+                            else
+                            {
+                                timer.print.Content = GetTimerText(timer.startDate.Value);
+                            }
+                        }
+                        else
+                        {
+                            if (timer.startDate is not null)
+                            {
+                                Hide(player);
+                                _messagingService.MsgToPlayerChat(player,
+                                    $"Timer stopped after {(DateTime.UtcNow - timer.startDate).Value.TotalSeconds:0.00}s");
+                            }
+                            else
+                            {
+                                timer.print.Content = GetTimerText(DateTime.UtcNow);
+                            }
+                        }
+                    }
+                });
+
+                foreach (var player in Timer2.Keys)
                 {
                     if (player.IsValid == false)
                     {
@@ -129,7 +228,7 @@ public class TimerService : Base
                         continue;
                     }
 
-                    if (_timers.TryGetValue(player, out var timer) == false)
+                    if (Timer2.TryGetValue(player, out var timer) == false)
                     {
                         _logger.LogError(
                             "Player exist as key but TryGetValue returned false. This should never happen");

@@ -10,8 +10,23 @@ using Vector = CounterStrikeSharp.API.Modules.Utils.Vector;
 
 namespace Cs2PracticeMode.Services._1.GrenadeStorageFolder;
 
-public record Vector3Json(float X, float Y, float Z)
+public class Vector3Json
 {
+    public float X { get; init; }
+    public float Y { get; init; }
+    public float Z { get; init; }
+
+    public Vector3Json()
+    {
+    }
+
+    public Vector3Json(float x, float y, float z)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+    }
+
     public Vector3Json(Vector vector3) : this(vector3.X, vector3.Y, vector3.Z)
     {
     }

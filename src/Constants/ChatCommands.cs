@@ -51,7 +51,7 @@ public static class ChatCommands
     public const string DeleteGrenadeTag = "deletetag";
     public const string ClearGrenadeTags = "cleartags";
 
-    public const string Throw = "rethrow";
+    public const string Throw = "throw";
     public const string Rethrow = "rethrow";
     public const string Last = "last";
     public const string Forward = "forward";
@@ -70,4 +70,5 @@ public static class ChatCommands
     public const string SwapTeam = "swap";
 
     public const string Timer = "timer";
+    public const string Timer2 = "timer2";
 }

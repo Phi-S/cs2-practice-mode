@@ -21,15 +21,16 @@ public class SettingsStorageService : Base
 
     public override void Load(BasePlugin plugin)
     {
+        const string name = "settings";
         if (_pluginConfigService.Config.DataLocation.ToLower().StartsWith("local#"))
         {
             var dataLocation = _pluginConfigService.Config.DataLocation.Replace("local#", "");
-            _storage = new LocalStorageSingle<Settings>(dataLocation, "settings");
+            _storage = new LocalStorageSingle<Settings>(dataLocation, name);
         }
         else if (_pluginConfigService.Config.DataLocation.ToLower().StartsWith("postgres#"))
         {
             var dataLocation = _pluginConfigService.Config.DataLocation.Replace("postgres#", "");
-            _storage = new PostgresStorageSingle<Settings>(dataLocation, "settings");
+            _storage = new PostgresStorageSingle<Settings>(dataLocation, name);
         }
         else
         {

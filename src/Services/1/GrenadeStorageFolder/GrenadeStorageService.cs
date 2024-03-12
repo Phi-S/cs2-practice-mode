@@ -25,18 +25,17 @@ public class GrenadeStorageService : Base
 
     public override void Load(BasePlugin plugin)
     {
+        const string name = "grenades";
         if (_pluginConfigService.Config.DataLocation.ToLower().StartsWith("local#"))
         {
             var dataLocation = _pluginConfigService.Config.DataLocation.Replace("local#", "");
-            var localFilePath = Path.Combine(dataLocation, "grenades");
+            var localFilePath = Path.Combine(dataLocation, name);
             _storageCollection = new LocalStorageCollection<GrenadeJsonModel>(localFilePath);
-            _logger.LogInformation("Grenade storage is using local storage");
         }
         else if (_pluginConfigService.Config.DataLocation.ToLower().StartsWith("postgres#"))
         {
             var dataLocation = _pluginConfigService.Config.DataLocation.Replace("postgres#", "");
-            _storageCollection = new PostgresStorageCollection<GrenadeJsonModel>(dataLocation, "grenades");
-            _logger.LogInformation("Grenade storage is using postgres storage");
+            _storageCollection = new PostgresStorageCollection<GrenadeJsonModel>(dataLocation, name);
         }
         else
         {

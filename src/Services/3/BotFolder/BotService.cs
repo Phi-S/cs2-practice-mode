@@ -20,6 +20,11 @@ public partial class BotService : Base
     private readonly MessagingService _messagingService;
 
     private readonly ConcurrentBag<Timer> _timers = new();
+    
+    /// <summary>
+    ///     Dict of a bots Id = userid of bot
+    /// </summary>
+    private ConcurrentDictionary<int, BotInfo> SpawnedBots { get; } = new();
 
     public BotService(ILogger<BotService> logger, CommandService commandService, MessagingService messagingService)
     {
@@ -27,11 +32,6 @@ public partial class BotService : Base
         _commandService = commandService;
         _messagingService = messagingService;
     }
-
-    /// <summary>
-    ///     Dict of a bots Id = userid of bot
-    /// </summary>
-    private ConcurrentDictionary<int, BotInfo> SpawnedBots { get; } = new();
 
     public override void Load(BasePlugin plugin)
     {

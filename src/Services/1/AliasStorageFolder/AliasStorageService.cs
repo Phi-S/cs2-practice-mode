@@ -28,22 +28,21 @@ public class AliasStorageService : Base
 
     public override void Load(BasePlugin plugin)
     {
+        const string name = "aliases";
         if (_pluginConfigService.Config.DataLocation.ToLower().StartsWith("local#"))
         {
             var dataLocation = _pluginConfigService.Config.DataLocation.Replace("local#", "");
-            var localFilePath = Path.Combine(dataLocation, "grenades");
+            var localFilePath = Path.Combine(dataLocation, name);
             _globalAliasStorageCollection = new LocalStorageCollection<GlobalAliasJsonModel>(localFilePath);
             _playerAliasStorageCollection = new LocalStorageCollection<PlayerAliasJsonModel>(localFilePath);
-            _logger.LogInformation("Alias storage is using local storage");
         }
         else if (_pluginConfigService.Config.DataLocation.ToLower().StartsWith("postgres#"))
         {
             var dataLocation = _pluginConfigService.Config.DataLocation.Replace("postgres#", "");
             _globalAliasStorageCollection =
-                new PostgresStorageCollection<GlobalAliasJsonModel>(dataLocation, "grenades");
+                new PostgresStorageCollection<GlobalAliasJsonModel>(dataLocation, name);
             _playerAliasStorageCollection =
-                new PostgresStorageCollection<PlayerAliasJsonModel>(dataLocation, "grenades");
-            _logger.LogInformation("Alias storage is using postgres storage");
+                new PostgresStorageCollection<PlayerAliasJsonModel>(dataLocation, name);
         }
         else
         {
