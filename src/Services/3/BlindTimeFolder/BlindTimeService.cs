@@ -25,12 +25,6 @@ public class BlindTimeService : Base
         base.Load(plugin);
     }
 
-    public override void Unload(BasePlugin plugin)
-    {
-        plugin.DeregisterEventHandler<EventPlayerBlind>(OnPlayerBlind);
-        base.Unload(plugin);
-    }
-
     private HookResult OnPlayerBlind(EventPlayerBlind @event, GameEventInfo info)
     {
         if (_settingsStorageService.Get().DisableBlindTimePrint)

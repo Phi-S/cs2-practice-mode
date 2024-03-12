@@ -472,7 +472,7 @@ public class CommandService : Base
             return true;
         }
 
-        if (AdminManager.PlayerInGroup(player, Permissions.Groups.Root) ||
+        if (AdminManager.PlayerHasPermissions(player, Permissions.Flags.Root) ||
             AdminManager.PlayerHasPermissions(player, Permissions.Flags.Rcon))
         {
             return true;

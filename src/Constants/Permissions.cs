@@ -9,18 +9,10 @@ public static class Permissions
         return $"@{Domain}/{flag}";
     }
 
-    public static class Groups
-    {
-        public static readonly string Root = GetGroup("root");
-
-        private static string GetGroup(string group)
-        {
-            return $"#{Domain}/{group}";
-        }
-    }
-
     public static class Flags
     {
+        public static readonly string Root = GetFlag("root");
+        
         public static readonly string Alias = GetFlag("alias");
         public static readonly string RemoveAlias = GetFlag("removealias");
         public static readonly string GlobalAlias = GetFlag("globalalias");

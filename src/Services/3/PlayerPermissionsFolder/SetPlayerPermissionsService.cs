@@ -25,7 +25,7 @@ public class SetPlayerPermissionsService : Base
     {
         if (_pluginConfigService.Config.EnablePermissions == false)
         {
-            AdminManager.AddPlayerPermissions(@event.Userid, Permissions.Groups.Root);
+            AdminManager.AddPlayerPermissions(@event.Userid, Permissions.Flags.Root);
         }
 
         return HookResult.Continue;
