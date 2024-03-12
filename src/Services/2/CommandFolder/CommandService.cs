@@ -545,21 +545,6 @@ public class CommandService : Base
 
     #endregion
 
-    #region GetArgs
-
-    public ErrorOr<List<string>> GetArgs(string playerText)
-    {
-        var playerTextSplit = playerText.Split(" ");
-        if (playerText.Length == 1)
-        {
-            return Errors.Fail("No args provided");
-        }
-
-        return playerTextSplit.Skip(1).ToList();
-    }
-
-    #endregion
-
     #region GetRegisteredCommand
 
     private ErrorOr<RegisteredCommand> GetRegisteredCommand(CCSPlayerController player, string command)

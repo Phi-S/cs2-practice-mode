@@ -59,12 +59,7 @@ public class MessagingService : Base
             }
         }
 
-        if (_openHtmlPrints.ContainsKey(player))
-        {
-            return true;
-        }
-
-        return false;
+        return _openHtmlPrints.ContainsKey(player);
     }
 
     public void MsgToPlayerChat(CCSPlayerController player, string message, bool usePrefix = true)
@@ -100,16 +95,6 @@ public class MessagingService : Base
     public ErrorOr<HtmlPrint> ShowCenterHtml(CCSPlayerController player, string html)
     {
         return ShowCenterHtml(player, html, null);
-    }
-
-    public ErrorOr<HtmlPrint> ShowCenterHtml(CCSPlayerController player, string html, int hideAfterSeconds)
-    {
-        return ShowCenterHtml(player, html, TimeSpan.FromSeconds(hideAfterSeconds));
-    }
-
-    public ErrorOr<HtmlPrint> ShowCenterHtml(CCSPlayerController player, string html, TimeSpan hideAfter)
-    {
-        return ShowCenterHtml(player, html, DateTime.UtcNow.Add(hideAfter));
     }
 
     private ErrorOr<HtmlPrint> ShowCenterHtml(CCSPlayerController player, string html, DateTime? hideUtc)

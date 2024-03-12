@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using Cs2PracticeMode.Constants;
@@ -22,7 +21,7 @@ public class SmokeFlyTimeService : Base
 
     public override void Load(BasePlugin plugin)
     {
-        plugin.RegisterListener<Listeners.OnEntitySpawned>(entity => OnEntitySpawned(entity));
+        plugin.RegisterListener<Listeners.OnEntitySpawned>(OnEntitySpawned);
         plugin.RegisterEventHandler<EventSmokegrenadeDetonate>(OnSmokeDetonate);
         base.Load(plugin);
     }
@@ -54,12 +53,10 @@ public class SmokeFlyTimeService : Base
             _logger.LogError("Failed to get detonated smoke from last thrown smoke");
             return HookResult.Continue;
         }
-
-        var projectile = Utilities.GetEntityFromIndex<CSmokeGrenadeProjectile>(@event.Entityid);
+        
         _messagingService.MsgToAll(
             $"Smoke thrown by {ChatColors.Blue}{@event.Userid.PlayerName}{ChatColors.White}" +
-            $" took {ChatColors.Green}{(DateTime.UtcNow - result).TotalSeconds.ToString("0.00")}{ChatColors.White}s" +
-            $" and {ChatColors.Green}{projectile.Bounces}{ChatColors.White} bounces to detonate");
+            $" took {ChatColors.Green}{(DateTime.UtcNow - result).TotalSeconds:0.00}{ChatColors.White} seconds");
 
         return HookResult.Continue;
     }

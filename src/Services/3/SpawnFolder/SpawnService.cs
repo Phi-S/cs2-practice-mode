@@ -88,7 +88,7 @@ public class SpawnService : Base
         var minPrio = 1;
         foreach (var spawn in spawns)
         {
-            if (spawn.IsValid && spawn.Enabled && spawn.Priority <= minPrio)
+            if (spawn is { IsValid: true, Enabled: true } && spawn.Priority <= minPrio)
             {
                 minPrio = spawn.Priority;
             }
@@ -96,7 +96,7 @@ public class SpawnService : Base
 
         foreach (var spawn in spawns)
         {
-            if (spawn.IsValid && spawn.Enabled && spawn.Priority == minPrio)
+            if (spawn is { IsValid: true, Enabled: true } && spawn.Priority == minPrio)
             {
                 result.Add(
                     new Position(

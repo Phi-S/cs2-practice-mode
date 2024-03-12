@@ -1,8 +1,5 @@
 ﻿using System.Reflection;
-using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Admin;
-using Cs2PracticeMode.Constants;
 using Cs2PracticeMode.Services;
 using Cs2PracticeMode.Services._0.PluginConfigFolder;
 using Cs2PracticeMode.Services._1.AliasStorageFolder;
@@ -78,14 +75,11 @@ public class Cs2PracModeServiceCollection : IPluginServiceCollection<Cs2Practice
 public class Cs2PracticeMode : BasePlugin
 {
     private readonly ILogger<Cs2PracticeMode> _logger;
-    private readonly PluginConfigService _pluginConfigService;
     private readonly IServiceProvider _serviceProvider;
 
-    public Cs2PracticeMode(ILogger<Cs2PracticeMode> logger, PluginConfigService pluginConfigService,
-        IServiceProvider serviceProvider)
+    public Cs2PracticeMode(ILogger<Cs2PracticeMode> logger, IServiceProvider serviceProvider)
     {
         _logger = logger;
-        _pluginConfigService = pluginConfigService;
         _serviceProvider = serviceProvider;
     }
 
@@ -104,15 +98,6 @@ public class Cs2PracticeMode : BasePlugin
             var servicesToLoad = services.Where(s => s.LoadOrder == loadOrder)
                 .ToList();
             LoadServices(servicesToLoad);
-        }
-
-        if (_pluginConfigService.Config.EnablePermissions == false)
-        {
-            var allPlayers = Utilities.GetPlayers();
-            foreach (var player in allPlayers)
-            {
-                AdminManager.AddPlayerPermissions(player, Permissions.Flags.Root);
-            }
         }
 
         base.Load(hotReload);

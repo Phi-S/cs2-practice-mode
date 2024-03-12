@@ -112,7 +112,7 @@ public partial class BotService
             return Errors.Fail("Player pawn not valid");
         }
 
-        var lastBotSpawned = SpawnedBots.Values.Where(b => b.Owner == player).MaxBy(b => b.AddedUtc);
+        var lastBotSpawned = _spawnedBots.Values.Where(b => b.Owner == player).MaxBy(b => b.AddedUtc);
         if (lastBotSpawned is null || lastBotSpawned.Controller.IsValid == false)
         {
             return Errors.Fail("Failed to move bot. Could not get last bot spawned");
@@ -147,7 +147,7 @@ public partial class BotService
             return Errors.Fail("Closest bot is not valid");
         }
 
-        if (SpawnedBots.TryRemove(closestBot.Controller.UserId.Value, out _) == false)
+        if (_spawnedBots.TryRemove(closestBot.Controller.UserId.Value, out _) == false)
         {
             return Errors.Fail("Failed to remove closest bot. No valid bot found");
         }
@@ -163,7 +163,7 @@ public partial class BotService
             return Errors.Fail("Player pawn not valid");
         }
 
-        foreach (var spawnedBotInfo in SpawnedBots.Values.Where(b => b.Owner == player))
+        foreach (var spawnedBotInfo in _spawnedBots.Values.Where(b => b.Owner == player))
         {
             var bot = spawnedBotInfo.Controller;
             if (bot.UserId is null)
@@ -171,7 +171,7 @@ public partial class BotService
                 continue;
             }
 
-            SpawnedBots.TryRemove(bot.UserId.Value, out _);
+            _spawnedBots.TryRemove(bot.UserId.Value, out _);
             Server.ExecuteCommand($"bot_kick {bot.PlayerName}");
         }
 
@@ -180,7 +180,7 @@ public partial class BotService
 
     private ErrorOr<Success> CommandActionClearBots(CCSPlayerController player, CommandInfo commandInfo)
     {
-        SpawnedBots.Clear();
+        _spawnedBots.Clear();
         Server.ExecuteCommand("bot_kick");
         return Result.Success;
     }

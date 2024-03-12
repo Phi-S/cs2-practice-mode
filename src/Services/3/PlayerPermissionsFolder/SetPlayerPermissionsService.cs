@@ -1,4 +1,5 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
 using Cs2PracticeMode.Constants;
 using Cs2PracticeMode.Services._0.PluginConfigFolder;
@@ -17,6 +18,15 @@ public class SetPlayerPermissionsService : Base
 
     public override void Load(BasePlugin plugin)
     {
+        if (_pluginConfigService.Config.EnablePermissions == false)
+        {
+            var allPlayers = Utilities.GetPlayers();
+            foreach (var player in allPlayers)
+            {
+                AdminManager.AddPlayerPermissions(player, Permissions.Flags.Root);
+            }
+        }
+        
         plugin.RegisterEventHandler<EventPlayerConnectFull>(EventHandlerOnPlayerConnectFull);
         base.Load(plugin);
     }

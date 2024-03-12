@@ -1,6 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
-using Cs2PracticeMode.Extensions;
 using Cs2PracticeMode.Services._1.SettingsStorageFolder;
 using Cs2PracticeMode.Services._2.MessagingFolder;
 

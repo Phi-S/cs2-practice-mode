@@ -10,13 +10,8 @@ public record Position(Vector Pos, QAngle Angle)
     {
         var playerPosition = playerPawn.AbsOrigin;
         var playerAngle = playerPawn.EyeAngles;
-        return CopyFrom(playerPosition, playerAngle);
-    }
-
-    public static Position CopyFrom(Vector? position, QAngle? angle)
-    {
-        var savedPosition = new Vector(position?.X, position?.Y, position?.Z);
-        var savedAngle = new QAngle(angle?.X, angle?.Y, angle?.Z);
+        var savedPosition = new Vector(playerPosition?.X, playerPosition?.Y, playerPosition?.Z);
+        var savedAngle = new QAngle(playerAngle.X, playerAngle.Y, playerAngle.Z);
         return new Position(savedPosition, savedAngle);
     }
 

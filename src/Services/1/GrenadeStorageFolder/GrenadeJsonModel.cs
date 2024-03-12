@@ -16,6 +16,9 @@ public class Vector3Json
     public float Y { get; init; }
     public float Z { get; init; }
 
+    /// <summary>
+    /// Needed for Deserialization
+    /// </summary>
     public Vector3Json()
     {
     }

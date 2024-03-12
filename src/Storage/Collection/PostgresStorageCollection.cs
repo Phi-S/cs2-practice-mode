@@ -8,8 +8,8 @@ namespace Cs2PracticeMode.Storage.Collection;
 
 public class PostgresStorageModel
 {
-    public required uint Id { get; set; }
-    public required string Json { get; set; }
+    public required uint Id { get; init; }
+    public required string Json { get; init; }
 }
 
 public class PostgresStorageCollection<T> : IStorageCollection<T> where T : IDataCollection

@@ -3,26 +3,22 @@ using Cs2PracticeMode.Constants;
 using Cs2PracticeMode.Services._0.PluginConfigFolder;
 using Cs2PracticeMode.Storage.Collection;
 using ErrorOr;
-using Microsoft.Extensions.Logging;
 
 namespace Cs2PracticeMode.Services._1.AliasStorageFolder;
 
 public class AliasStorageService : Base
 {
-    private readonly ILogger<AliasStorageService> _logger;
     private readonly PluginConfigService _pluginConfigService;
 
     private IStorageCollection<GlobalAliasJsonModel> _globalAliasStorageCollection = null!;
     private IStorageCollection<PlayerAliasJsonModel> _playerAliasStorageCollection = null!;
 
     private readonly object _aliasLock = new();
-    private List<GlobalAliasJsonModel> GlobalAliasesCache { get; } = new();
-    private List<PlayerAliasJsonModel> PlayerAliasesCache { get; } = new();
+    private readonly List<GlobalAliasJsonModel> _globalAliasesCache = new();
+    private readonly List<PlayerAliasJsonModel> _playerAliasesCache = new();
 
-    public AliasStorageService(ILogger<AliasStorageService> logger, PluginConfigService pluginConfigService) : base(
-        LoadOrder.High)
+    public AliasStorageService(PluginConfigService pluginConfigService) : base(LoadOrder.High)
     {
-        _logger = logger;
         _pluginConfigService = pluginConfigService;
     }
 
@@ -75,8 +71,8 @@ public class AliasStorageService : Base
                 return aliases.FirstError;
             }
 
-            GlobalAliasesCache.Clear();
-            GlobalAliasesCache.AddRange(aliases.Value);
+            _globalAliasesCache.Clear();
+            _globalAliasesCache.AddRange(aliases.Value);
         }
 
         return Result.Success;
@@ -92,8 +88,8 @@ public class AliasStorageService : Base
                 return aliases.FirstError;
             }
 
-            PlayerAliasesCache.Clear();
-            PlayerAliasesCache.AddRange(aliases.Value);
+            _playerAliasesCache.Clear();
+            _playerAliasesCache.AddRange(aliases.Value);
         }
 
         return Result.Success;
@@ -104,7 +100,7 @@ public class AliasStorageService : Base
         lock (_aliasLock)
         {
             alias = alias.ToLower().Trim();
-            return GlobalAliasesCache.Exists(a => a.Alias.ToLower().Trim().Equals(alias));
+            return _globalAliasesCache.Exists(a => a.Alias.ToLower().Trim().Equals(alias));
         }
     }
 
@@ -113,7 +109,7 @@ public class AliasStorageService : Base
         lock (_aliasLock)
         {
             alias = alias.ToLower().Trim();
-            return PlayerAliasesCache.Exists(
+            return _playerAliasesCache.Exists(
                 a => a.PlayerSteamId == player.SteamID && a.Alias.ToLower().Trim() == alias);
         }
     }
@@ -123,7 +119,7 @@ public class AliasStorageService : Base
         lock (_aliasLock)
         {
             alias = alias.ToLower().Trim();
-            var foundCommand = GlobalAliasesCache.FirstOrDefault(a => a.Alias.ToLower().Trim() == alias);
+            var foundCommand = _globalAliasesCache.FirstOrDefault(a => a.Alias.ToLower().Trim() == alias);
             if (foundCommand is null)
             {
                 return Errors.Fail($"No command found for alias \"{alias}\"");
@@ -138,7 +134,7 @@ public class AliasStorageService : Base
         lock (_aliasLock)
         {
             alias = alias.ToLower().Trim();
-            var foundCommand = PlayerAliasesCache.FirstOrDefault(a =>
+            var foundCommand = _playerAliasesCache.FirstOrDefault(a =>
                 a.PlayerSteamId == player.SteamID && a.Alias.ToLower().Trim() == alias);
             if (foundCommand is null)
             {
@@ -189,7 +185,7 @@ public class AliasStorageService : Base
             {
                 return Errors.Fail($"Global alias \"{alias}\" already exists");
             }
-            
+
             if (PlayerAliasExists(player, alias))
             {
                 return Errors.Fail($"Player alias \"{alias}\" already exists for player with steamid {player.SteamID}");
@@ -224,7 +220,7 @@ public class AliasStorageService : Base
         lock (_aliasLock)
         {
             alias = alias.ToLower().Trim();
-            var globalAliasJsonModel = GlobalAliasesCache.FirstOrDefault(a => a.Alias.ToLower().Trim() == alias);
+            var globalAliasJsonModel = _globalAliasesCache.FirstOrDefault(a => a.Alias.ToLower().Trim() == alias);
             if (globalAliasJsonModel is null)
             {
                 return Errors.Fail($"Global alias \"{alias}\" not registered");
@@ -251,7 +247,7 @@ public class AliasStorageService : Base
         lock (_aliasLock)
         {
             alias = alias.ToLower().Trim();
-            var globalAliasJsonModel = PlayerAliasesCache.FirstOrDefault(a =>
+            var globalAliasJsonModel = _playerAliasesCache.FirstOrDefault(a =>
                 a.PlayerSteamId == player.SteamID && a.Alias.ToLower().Trim() == alias);
             if (globalAliasJsonModel is null)
             {

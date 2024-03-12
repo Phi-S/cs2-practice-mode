@@ -20,11 +20,7 @@ public partial class BotService : Base
     private readonly MessagingService _messagingService;
 
     private readonly ConcurrentBag<Timer> _timers = new();
-    
-    /// <summary>
-    ///     Dict of a bots Id = userid of bot
-    /// </summary>
-    private ConcurrentDictionary<int, BotInfo> SpawnedBots { get; } = new();
+    private readonly ConcurrentDictionary<int, BotInfo> _spawnedBots = new();
 
     public BotService(ILogger<BotService> logger, CommandService commandService, MessagingService messagingService)
     {
@@ -93,7 +89,7 @@ public partial class BotService : Base
             timer.Kill();
         }
 
-        SpawnedBots.Clear();
+        _spawnedBots.Clear();
         base.Unload(plugin);
     }
 
@@ -160,7 +156,7 @@ public partial class BotService : Base
     {
         BotInfo? closestBot = null;
         float smallestDistance = 0;
-        foreach (var botInfo in SpawnedBots.Values)
+        foreach (var botInfo in _spawnedBots.Values)
         {
             if (botInfo.Controller.IsValid == false)
             {
@@ -272,7 +268,7 @@ public partial class BotService : Base
             }
 
             var botUserId = bot.UserId.Value;
-            var botAlreadyInUse = SpawnedBots.TryGetValue(botUserId, out _);
+            var botAlreadyInUse = _spawnedBots.TryGetValue(botUserId, out _);
             if (botAlreadyInUse)
             {
                 continue;
@@ -308,7 +304,7 @@ public partial class BotService : Base
                 crouch,
                 DateTime.UtcNow);
 
-            if (SpawnedBots.TryAdd(botUserId, spawnedBotInfo) == false)
+            if (_spawnedBots.TryAdd(botUserId, spawnedBotInfo) == false)
             {
                 _messagingService.MsgToPlayerChat(player, "Failed to spawn bot. Bot is already in spawned");
                 continue;
@@ -350,7 +346,7 @@ public partial class BotService : Base
             return HookResult.Continue;
         }
 
-        if (SpawnedBots.TryGetValue(player.UserId.Value, out var botInfo) == false)
+        if (_spawnedBots.TryGetValue(player.UserId.Value, out var botInfo) == false)
         {
             return HookResult.Continue;
         }

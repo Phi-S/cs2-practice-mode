@@ -77,8 +77,7 @@ public class TimerService : Base
         if (Timer.ContainsKey(player))
         {
             Hide(player);
-            _messagingService.MsgToPlayerChat(player,
-                $"Timer stopped");
+            _messagingService.MsgToPlayerChat(player, "Timer stopped");
             return Result.Success;
         }
 
