@@ -4,12 +4,18 @@ namespace Cs2PracticeModeTests.Helpers.RandomHelperFolder;
 
 public static class RandomHelper
 {
+    public static uint RandomUInt()
+    {
+        var random = new Random();
+        return (uint) random.Next();
+    }
+
     public static long RandomLong()
     {
         var random = new Random();
         return random.NextInt64();
     }
-    
+
     public static string RandomString(int length = 20)
     {
         var random = new Random();
@@ -20,6 +26,6 @@ public static class RandomHelper
             sb.Append(chars[random.Next(chars.Length)]);
         }
 
-        return sb.ToString();
+        return sb.ToString().ToLower();
     }
 }

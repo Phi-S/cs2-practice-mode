@@ -9,13 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CounterStrikeSharp.API" Version="1.0.194">
+        <PackageReference Include="CounterStrikeSharp.API" Version="1.0.195">
             <IncludeAssets>compile</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0">
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1">
             <IncludeAssets>compile</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0">
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1">
             <IncludeAssets>compile</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Dapper" Version="2.1.35"/>

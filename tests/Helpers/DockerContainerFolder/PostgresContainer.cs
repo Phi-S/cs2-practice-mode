@@ -34,7 +34,7 @@ public static class PostgresContainer
     }
 
     public static async Task<(string id, string containerName, string connectionString)> StartNew(
-        ITestOutputHelper outputHelper)
+        ITestOutputHelper outputHelper, bool debug = false)
     {
         var name = $"postgres-{GetContainerNameId()}";
         await DockerApi.DockerClient.Images
@@ -65,7 +65,11 @@ public static class PostgresContainer
         var progress = new Progress<string>();
         progress.ProgressChanged += (_, logLine) =>
         {
-            outputHelper.WriteLine(logLine);
+            if (debug)
+            {
+                outputHelper.WriteLine(logLine);
+            }
+
             if (logLine.EndsWith("database system is ready to accept connections"))
             {
                 postgresStarted = true;

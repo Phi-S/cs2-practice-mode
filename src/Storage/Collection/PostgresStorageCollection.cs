@@ -24,10 +24,23 @@ public class PostgresStorageCollection<T> : IStorageCollection<T> where T : IDat
         CreateTable();
     }
 
+    private void CreateTable()
+    {
+        var connection = new NpgsqlConnection(_connectionString);
+        var command =
+            new NpgsqlCommand($"""
+                               CREATE TABLE "{_tableName}" (
+                               id SERIAL PRIMARY KEY,
+                               json TEXT NOT NULL);
+                               """, connection);
+        connection.Open();
+        command.ExecuteNonQuery();
+        connection.Close();
+    }
 
     public ErrorOr<List<T>> GetAll()
     {
-        var sql = $"""SELECT * FROM "{_tableName}" """;
+        var sql = $"""SELECT * FROM "{_tableName}";""";
         using IDbConnection connection = new NpgsqlConnection(_connectionString);
         var result = new List<T>();
         var dbResults = connection.Query<PostgresStorageModel>(sql);
@@ -56,7 +69,7 @@ public class PostgresStorageCollection<T> : IStorageCollection<T> where T : IDat
     {
         var sql = $"""SELECT * FROM "{_tableName}" WHERE "id" = @Id""";
         using IDbConnection connection = new NpgsqlConnection(_connectionString);
-        var dbResult = connection.QuerySingle<PostgresStorageModel>(sql, new { Id = id });
+        var dbResult = connection.QuerySingle<PostgresStorageModel>(sql, new { Id = (int)id });
         var dataResult = StorageHelper.Deserialize<T>(dbResult.Json);
         if (dataResult.IsError)
         {
@@ -75,10 +88,9 @@ public class PostgresStorageCollection<T> : IStorageCollection<T> where T : IDat
     public ErrorOr<T> Add(T data)
     {
         using IDbConnection connection = new NpgsqlConnection(_connectionString);
-        const string getNextIdSql = "SELECT nextval('Id_seq');";
-        var nextId = connection.QuerySingle<uint>(getNextIdSql);
+        var nextId = connection.QuerySingle<int>($"SELECT nextval(pg_get_serial_sequence('{_tableName}', 'id'));");
 
-        data.Id = nextId;
+        data.Id = (uint)nextId;
         data.UpdatedUtc = DateTime.UtcNow;
         data.CreatedUtc = DateTime.UtcNow;
 
@@ -88,8 +100,9 @@ public class PostgresStorageCollection<T> : IStorageCollection<T> where T : IDat
             return json.FirstError;
         }
 
-        var sql = $"""INSERT INTO "{_tableName}" ("id","json") VALUES (@Id, @Json)""";
-        var rowsAffected = connection.Execute(sql, new { Id = nextId, Json = json.Value });
+        var rowsAffected = connection.Execute(
+            $"""INSERT INTO "{_tableName}" ("id", "json") VALUES (@Id, @Json)""",
+            new { Id = nextId, Json = json.Value });
         if (rowsAffected != 1)
         {
             return Errors.Fail($"{rowsAffected} rows affected");
@@ -100,15 +113,28 @@ public class PostgresStorageCollection<T> : IStorageCollection<T> where T : IDat
 
     public ErrorOr<Success> Update(T data)
     {
-        var sql = $"""UPDATE "{_tableName}" SET "json" = @Json where "id" = @Id""";
+        var getResult = Get(data.Id);
+        if (getResult.IsError)
+        {
+            return getResult.FirstError;
+        }
+        
         using IDbConnection connection = new NpgsqlConnection(_connectionString);
         data.UpdatedUtc = DateTime.UtcNow;
+        data.CreatedUtc = getResult.Value.CreatedUtc;
+        
         var json = StorageHelper.Serialize(data);
-
-        var rowsAffected = connection.Execute(sql, new { data.Id, Json = json });
-        if (rowsAffected != 1)
+        if (json.IsError)
         {
-            return Errors.Fail($"{rowsAffected} rows affected");
+            return json.FirstError;
+        }
+
+        var affectedRows = connection.Execute(
+            $"""UPDATE "{_tableName}" SET "json" = @Json where "id" = @Id""",
+            new { id = (int)data.Id, Json = json.Value });
+        if (affectedRows != 1)
+        {
+            return Errors.Fail($"{affectedRows} rows affected");
         }
 
         return Result.Success;
@@ -116,7 +142,15 @@ public class PostgresStorageCollection<T> : IStorageCollection<T> where T : IDat
 
     public ErrorOr<Deleted> Delete(uint id)
     {
-        throw new NotImplementedException();
+        var sql = $"""DELETE FROM "{_tableName}" WHERE "id" = @id""";
+        using IDbConnection connection = new NpgsqlConnection(_connectionString);
+        var affectedRows = connection.Execute(sql, new { id = (int)id });
+        if (affectedRows != 1)
+        {
+            return Errors.Fail($"{affectedRows} rows affected");
+        }
+
+        return Result.Deleted;
     }
 
     public bool Exist(uint id)
@@ -125,20 +159,5 @@ public class PostgresStorageCollection<T> : IStorageCollection<T> where T : IDat
         using IDbConnection connection = new NpgsqlConnection(_connectionString);
         var exists = connection.ExecuteScalar<bool>(existsSql, new { Id = id });
         return exists;
-    }
-
-    private void CreateTable()
-    {
-        var connection = new NpgsqlConnection(_connectionString);
-        var command =
-            new NpgsqlCommand($"""
-                               CREATE TABLE "{_tableName}" (
-                               "id" SERIAL NOT NULL,
-                               "json" TEXT NOT NULL,
-                               PRIMARY KEY ("id"))
-                               """, connection);
-        connection.Open();
-        command.ExecuteNonQuery();
-        connection.Close();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Cs2PracticeMode.Storage.Single;
 
-public class LocalStorageSingle<T> : IStorageSingle<T> where T : IData, new()
+public class LocalStorageSingle<T> : IStorageSingle<T> where T : IData
 {
     private readonly object _fileLock = new();
     private readonly string _storageFilePath;
@@ -81,7 +81,12 @@ public class LocalStorageSingle<T> : IStorageSingle<T> where T : IData, new()
 
     public ErrorOr<Deleted> Delete()
     {
-        throw new NotImplementedException();
+        lock (_fileLock)
+        {
+            File.Delete(_storageFilePath);
+        }
+
+        return Result.Deleted;
     }
 
     public bool Exists()
