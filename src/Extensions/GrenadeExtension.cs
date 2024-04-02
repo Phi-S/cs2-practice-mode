@@ -60,7 +60,8 @@ public static class GrenadeExtension
         CCSPlayerController player,
         GrenadeType_t grenadeType,
         Vector initialPosition,
-        QAngle angle, Vector velocity)
+        QAngle angle,
+        Vector velocity)
     {
         if (player.IsValid == false)
         {
@@ -88,7 +89,7 @@ public static class GrenadeExtension
             }
             case GrenadeType_t.GRENADE_TYPE_FLASH:
             {
-                cGrenade = Utilities.CreateEntityByName<CFlashbangProjectile>(DesignerNames.ProjectileFlashbang);
+                cGrenade = Utilities.CreateEntityByName<CBaseCSGrenadeProjectile>(DesignerNames.ProjectileFlashbang);
                 break;
             }
             case GrenadeType_t.GRENADE_TYPE_SMOKE:
@@ -159,7 +160,11 @@ public static class GrenadeExtension
         {
             return Errors.Fail("No valid grenade type found to throw");
         }
-
+        
+        cGrenade.Elasticity = 0.33f;
+        cGrenade.IsLive = false;
+        cGrenade.DmgRadius = 350.0f;
+        cGrenade.Damage = 99.0f;
         cGrenade.InitialPosition.X = initialPosition.X;
         cGrenade.InitialPosition.Y = initialPosition.Y;
         cGrenade.InitialPosition.Z = initialPosition.Z;
@@ -175,7 +180,6 @@ public static class GrenadeExtension
         cGrenade.Globalname = "custom";
         cGrenade.AcceptInput("FireUser1", player, player);
         cGrenade.AcceptInput("InitializeSpawnFromWorld");
-        cGrenade.TeamNum = player.TeamNum;
         cGrenade.Thrower.Raw = player.PlayerPawn.Raw;
         cGrenade.OriginalThrower.Raw = player.PlayerPawn.Raw;
         cGrenade.OwnerEntity.Raw = player.PlayerPawn.Raw;

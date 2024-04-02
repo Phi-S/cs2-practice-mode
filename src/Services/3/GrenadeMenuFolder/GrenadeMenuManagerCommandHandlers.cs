@@ -75,7 +75,7 @@ public partial class GrenadeMenuService
         var arg = commandInfo.GetArgString();
         if (arg.IsError)
         {
-            return arg.FirstError;
+            return arg.Errors;
         }
 
         var grenadeName = arg.Value;
@@ -88,13 +88,19 @@ public partial class GrenadeMenuService
         var jsonGrenade = GrenadeJsonModel.FromGrenade(lastThrownGrenade.Value, grenadeName, player);
         if (jsonGrenade.IsError)
         {
-            return jsonGrenade.FirstError;
+            return jsonGrenade.Errors;
         }
 
         var addResult = _grenadeStorageService.Add(jsonGrenade.Value);
         if (addResult.IsError)
         {
-            return addResult.FirstError;
+            return addResult.Errors;
+        }
+
+        var selectGrenade = SelectNade(player, jsonGrenade.Value);
+        if (selectGrenade.IsError)
+        {
+            return selectGrenade.Errors;
         }
 
         _messagingService.MsgToPlayerChat(player, $"Successfully saved grenade \"{grenadeName}\"");

@@ -229,7 +229,6 @@ public class LastThrownGrenadeService : Base
             return lastThrownGrenadeResult.FirstError;
         }
 
-
         var throwGrenadeProjectileResult = lastThrownGrenadeResult.Value.ThrowGrenade(player);
         if (throwGrenadeProjectileResult.IsError)
         {
