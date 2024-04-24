@@ -79,9 +79,9 @@ public class ClearGrenadesService : Base
                     entity.Remove();
                 }
             }
-            catch (AccessViolationException)
+            catch (ArgumentNullException)
             {
-                // If a smoke is thrown artificially, the entity.Thrower.Value call thrown a AccessViolationException
+                // If a smoke is thrown artificially, the entity.Thrower.Value call thrown a ArgumentNullException
                 // Remove entity, if last thrown nade position equals the entity initial position
                 var lastThrownGrenade = _lastThrownGrenadeService.GetLastThrownGrenade(player);
                 if (lastThrownGrenade.IsError)

@@ -25,7 +25,6 @@ using Cs2PracticeMode.Services._3.SettingsFolder;
 using Cs2PracticeMode.Services._3.SmokeColorFolder;
 using Cs2PracticeMode.Services._3.SmokeFlyTimeFolder;
 using Cs2PracticeMode.Services._3.SpawnFolder;
-using Cs2PracticeMode.Services._3.SwapTeamsFolder;
 using Cs2PracticeMode.Services._3.TimerFolder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -64,7 +63,6 @@ public class Cs2PracModeServiceCollection : IPluginServiceCollection<Cs2Practice
         serviceCollection.AddSingleton<SmokeColorService>();
         serviceCollection.AddSingleton<SmokeFlyTimeService>();
         serviceCollection.AddSingleton<SpawnService>();
-        serviceCollection.AddSingleton<SwapTeamsService>();
         serviceCollection.AddSingleton<TimerService>();
         serviceCollection.AddSingleton<ChangeMapService>();
         serviceCollection.AddSingleton<BotService>();
@@ -86,7 +84,7 @@ public class Cs2PracticeMode : BasePlugin
     public override string ModuleName => Assembly.GetExecutingAssembly().GetName().Name ??
                                          throw new NullReferenceException("AssemblyName");
 
-    public override string ModuleVersion => "1.0";
+    public override string ModuleVersion => File.ReadAllText(Path.Combine(ModuleDirectory, "VERSION"));
 
     public override void Load(bool hotReload)
     {

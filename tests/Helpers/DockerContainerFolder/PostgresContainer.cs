@@ -12,7 +12,7 @@ public static class PostgresContainer
     private const string Username = "postgres";
     private const string Password = "123";
 
-    private static readonly ConcurrentBag<string> ContainerNames = new();
+    private static readonly ConcurrentBag<string> ContainerNames = [];
     private static readonly object ContainerNamesLock = new();
 
     private static string GetContainerNameId()

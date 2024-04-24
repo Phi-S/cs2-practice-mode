@@ -1,5 +1,4 @@
-﻿using CounterStrikeSharp.API;
-using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
 using Cs2PracticeMode.Constants;
 using Cs2PracticeMode.Services._0.PluginConfigFolder;

@@ -36,11 +36,11 @@ public class PlayerDamageService : Base
         {
             attackerName = @event.Attacker.PlayerName;
         }
-        catch (AccessViolationException)
+        catch (ArgumentNullException)
         {
             // If a grenade is thrown/rethrown with the plugin,
-            // the event.Attacker call throws an AccessViolationException
-            // Rethrown grenades wont print the Attacker
+            // the event.Attacker call throws an ArgumentNullException
+            // Rethrown grenades won't print the Attacker
         }
 
         _messagingService.MsgToAll(

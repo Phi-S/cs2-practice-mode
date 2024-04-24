@@ -43,6 +43,8 @@ public partial class GrenadeMenuService : Base
 
     public override void Load(BasePlugin plugin)
     {
+        plugin.RegisterListener<Listeners.OnMapStart>(ListenersHandlerOnMapStart);
+
         _commandService.RegisterCommand(ChatCommands.GrenadeMenu,
             CommandActionOpenNadeMenu,
             ArgOption.NoArgs("Open global grenade menu"),
@@ -50,22 +52,20 @@ public partial class GrenadeMenuService : Base
 
         _commandService.RegisterCommand(ChatCommands.SelectGrenade,
             CommandActionSelectNade,
-            new[]
-            {
+            [
                 ArgOption.UInt("Select grenade to edit/throw by id", "grenade id"),
                 ArgOption.String("Select grenade to edit/throw by name", "grenade name")
-            },
-            new[] { Permissions.Flags.WriteGrenades });
+            ],
+            [Permissions.Flags.WriteGrenades]);
 
         _commandService.RegisterCommand(ChatCommands.Throw,
             CommandActionThrow,
-            new[]
-            {
+            [
                 ArgOption.NoArgs("Throw the selected grenade"),
                 ArgOption.UInt("Throw and select grenade by id", "grenade id"),
                 ArgOption.String("Throw and select grenade by name", "grenade name")
-            },
-            new[] { Permissions.Flags.ReadGrenades });
+            ],
+            [Permissions.Flags.ReadGrenades]);
 
         _commandService.RegisterCommand(ChatCommands.SaveGrenade,
             CommandActionSave,
@@ -118,6 +118,11 @@ public partial class GrenadeMenuService : Base
             Permissions.Flags.WriteGrenades);
 
         base.Load(plugin);
+    }
+
+    private void ListenersHandlerOnMapStart(string _)
+    {
+        SelectedGrenade.Clear();
     }
 
     private CenterHtmlMenu GenerateGrenadeMenu(string name, List<GrenadeJsonModel> grenades)

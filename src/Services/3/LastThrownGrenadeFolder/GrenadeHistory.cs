@@ -5,7 +5,7 @@ namespace Cs2PracticeMode.Services._3.LastThrownGrenadeFolder;
 
 public class GrenadeHistory
 {
-    private readonly List<Grenade> _history = new();
+    private readonly List<Grenade> _history = [];
     private readonly object _historyLock = new();
 
     // The current index used for .back .forward

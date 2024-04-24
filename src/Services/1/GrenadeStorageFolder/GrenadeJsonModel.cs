@@ -87,7 +87,7 @@ public class GrenadeJsonModel : IDataCollection
             Name = name,
             Description = "",
             Type = grenade.Type,
-            Tags = new List<string>(),
+            Tags = [],
             PlayerSteamId = player.SteamID,
             ThrowPosition = new Vector3Json(grenade.ThrowPosition),
             InitialPosition = new Vector3Json(grenade.InitialPosition),

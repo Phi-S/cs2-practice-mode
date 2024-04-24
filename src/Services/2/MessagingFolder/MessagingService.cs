@@ -27,6 +27,7 @@ public class MessagingService : Base
     public override void Load(BasePlugin plugin)
     {
         _plugin = plugin;
+        plugin.RegisterListener<Listeners.OnMapStart>(ListenersHandlerOnMapStart);
         plugin.RegisterListener<Listeners.OnTick>(OnTick);
 
         base.Load(plugin);
@@ -43,6 +44,17 @@ public class MessagingService : Base
         _openHtmlPrints.Clear();
 
         base.Unload(plugin);
+    }
+
+    private void ListenersHandlerOnMapStart(string mapname)
+    {
+        foreach (var openHtmlPrint in _openHtmlPrints)
+        {
+            HideCenterHtml(openHtmlPrint.Key, openHtmlPrint.Value.htmlPrint);
+        }
+
+        _openHtmlMenus.Clear();
+        _openHtmlMenus.Clear();
     }
 
     private bool PlayerHtmlBusy(CCSPlayerController player)

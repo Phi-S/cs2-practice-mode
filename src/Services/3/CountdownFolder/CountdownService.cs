@@ -10,10 +10,11 @@ namespace Cs2PracticeMode.Services._3.CountdownFolder;
 
 public class CountdownService : Base
 {
-    private readonly CommandService _commandService;
-    private readonly ConcurrentDictionary<CCSPlayerController, (DateTime endDate, HtmlPrint print)> _countdowns = new();
     private readonly ILogger<CountdownService> _logger;
+    private readonly CommandService _commandService;
     private readonly MessagingService _messagingService;
+
+    private readonly ConcurrentDictionary<CCSPlayerController, (DateTime endDate, HtmlPrint print)> _countdowns = new();
 
     private Task? _backgroundTask;
 
@@ -31,6 +32,9 @@ public class CountdownService : Base
     {
         _cancellationTokenSource = new CancellationTokenSource();
         _backgroundTask = BackgroundTask();
+
+        plugin.RegisterListener<Listeners.OnMapStart>(ListenersHandlerOnMapStart);
+
         _commandService.RegisterCommand(ChatCommands.Countdown,
             CommandHandlerCountdown,
             ArgOption.Double("Starts a countdown", "duration"),
@@ -38,6 +42,15 @@ public class CountdownService : Base
         );
 
         base.Load(plugin);
+    }
+
+    private void ListenersHandlerOnMapStart(string _)
+    {
+        foreach (var countdown in _countdowns)
+        {
+            _messagingService.HideCenterHtml(countdown.Key, countdown.Value.print);
+        }
+        _countdowns.Clear();
     }
 
     public override void Unload(BasePlugin plugin)

@@ -14,8 +14,8 @@ public class AliasStorageService : Base
     private IStorageCollection<PlayerAliasJsonModel> _playerAliasStorageCollection = null!;
 
     private readonly object _aliasLock = new();
-    private readonly List<GlobalAliasJsonModel> _globalAliasesCache = new();
-    private readonly List<PlayerAliasJsonModel> _playerAliasesCache = new();
+    private readonly List<GlobalAliasJsonModel> _globalAliasesCache = [];
+    private readonly List<PlayerAliasJsonModel> _playerAliasesCache = [];
 
     public AliasStorageService(PluginConfigService pluginConfigService) : base(LoadOrder.High)
     {

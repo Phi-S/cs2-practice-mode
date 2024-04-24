@@ -15,6 +15,7 @@ public class FlashService : Base
     private readonly CommandService _commandService;
 
     private readonly ConcurrentDictionary<CCSPlayerController, Position> _flashPosition = new();
+    private readonly ConcurrentDictionary<CCSPlayerController, HtmlPrint> _htmlPrints = new();
     private readonly MessagingService _messagingService;
 
     public FlashService(CommandService commandService,
@@ -26,6 +27,7 @@ public class FlashService : Base
 
     public override void Load(BasePlugin plugin)
     {
+        plugin.RegisterListener<Listeners.OnMapStart>(ListenerHandlerOnMapStart);
         plugin.RegisterListener<Listeners.OnEntitySpawned>(ListenerHandlerOnEntitySpawned);
 
         _commandService.RegisterCommand(ChatCommands.FlashMode,
@@ -41,6 +43,16 @@ public class FlashService : Base
         base.Load(plugin);
     }
 
+    private void ListenerHandlerOnMapStart(string _)
+    {
+        _flashPosition.Clear();
+        foreach (var centerMessage in _htmlPrints)
+        {
+            _messagingService.HideCenterHtml(centerMessage.Key, centerMessage.Value);
+        }
+        _htmlPrints.Clear();
+    }
+
     private ErrorOr<Success> CommandHandlerFlash(CCSPlayerController player, CommandInfo commandInfo)
     {
         if (player.PlayerPawn.Value is null)
@@ -49,7 +61,16 @@ public class FlashService : Base
         }
 
         _flashPosition[player] = Position.CopyFrom(player.PlayerPawn.Value);
-        _messagingService.ShowCenterHtml(player, "In flashing mode. Use .stop to disable flashing mode");
+
+        var showCenterHtml =
+            _messagingService.ShowCenterHtml(player, "In flashing mode. Use .stop to disable flashing mode");
+        if (showCenterHtml.IsError)
+        {
+            return showCenterHtml.Errors;
+        }
+
+        _htmlPrints[player] = showCenterHtml.Value;
+
         return Result.Success;
     }
 
@@ -64,6 +85,11 @@ public class FlashService : Base
             _messagingService.MsgToPlayerCenter(player, "Stopped flashing mode");
         }
 
+        if (_htmlPrints.TryRemove(player, out var htmlPrint))
+        {
+            _messagingService.HideCenterHtml(player, htmlPrint);
+        }
+        
         return Result.Success;
     }
 

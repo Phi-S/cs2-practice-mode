@@ -28,13 +28,13 @@ public class FakeRconService : Base
     {
         _commandService.RegisterCommand(ChatCommands.RconLogin,
             CommandActionRconLogin,
-            new[] { ArgOption.String("Login to get temporally admin permissions", "fake rcon password") },
+            [ArgOption.String("Login to get temporally admin permissions", "fake rcon password")],
             Array.Empty<string>());
 
         _commandService.RegisterCommand(ChatCommands.Rcon,
             CommandActionFakeRcon,
-            new[] { ArgOption.Any("Executes a rcon command", "command") },
-            new[] { Permissions.Flags.Rcon });
+            [ArgOption.Any("Executes a rcon command", "command")],
+            [Permissions.Flags.Rcon]);
 
         base.Load(plugin);
     }

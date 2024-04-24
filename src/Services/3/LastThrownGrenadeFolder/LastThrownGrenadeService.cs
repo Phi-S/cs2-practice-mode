@@ -13,11 +13,11 @@ namespace Cs2PracticeMode.Services._3.LastThrownGrenadeFolder;
 
 public class LastThrownGrenadeService : Base
 {
-    private readonly CommandService _commandService;
-    private readonly ConcurrentDictionary<uint, Grenade> _entityIdToGrenade = new();
-
-    private readonly ConcurrentDictionary<CCSPlayerController, GrenadeHistory> _lastThrownGrenade = new();
     private readonly ILogger<LastThrownGrenadeService> _logger;
+    private readonly CommandService _commandService;
+
+    private readonly ConcurrentDictionary<uint, Grenade> _entityIdToGrenade = new();
+    private readonly ConcurrentDictionary<CCSPlayerController, GrenadeHistory> _lastThrownGrenade = new();
 
 
     public LastThrownGrenadeService(ILogger<LastThrownGrenadeService> logger, CommandService commandService)
@@ -47,25 +47,23 @@ public class LastThrownGrenadeService : Base
 
         _commandService.RegisterCommand(ChatCommands.Forward,
             CommandHandlerForward,
-            new[]
-            {
+            [
                 ArgOption.NoArgs("Teleports to next grenade in the list of thrown grenade"),
                 ArgOption.UInt(
                     "Moves [amount] position forward in the list of thrown grenades and teleports to the grenade at that spot",
                     "amount")
-            },
-            new[] { Permissions.Flags.Forward, Permissions.Flags.Back });
+            ],
+            [Permissions.Flags.Forward, Permissions.Flags.Back]);
 
         _commandService.RegisterCommand(ChatCommands.Back,
             CommandHandlerBack,
-            new[]
-            {
+            [
                 ArgOption.NoArgs("Teleports to the previous grenade in the list of thrown grenade"),
                 ArgOption.UInt(
                     "Moves [amount] position backward in the list of thrown grenades and teleports to the grenade at that spot",
                     "amount")
-            },
-            new[] { Permissions.Flags.Forward, Permissions.Flags.Back });
+            ],
+            [Permissions.Flags.Forward, Permissions.Flags.Back]);
         base.Load(plugin);
     }
 
@@ -73,89 +71,6 @@ public class LastThrownGrenadeService : Base
     {
         _lastThrownGrenade.Clear();
         base.Unload(plugin);
-    }
-
-    public ErrorOr<Grenade> GetLastThrownGrenade(CCSPlayerController player)
-    {
-        if (_lastThrownGrenade.TryGetValue(player, out var grenadeHistory) == false)
-        {
-            return Errors.Fail("No grenades thrown yet");
-        }
-
-        return grenadeHistory.GetLatestSnapshotInHistory();
-    }
-
-    private void ListenerHandlerOnMapStart(string _)
-    {
-        _lastThrownGrenade.Clear();
-    }
-
-    private void ListenerHandlerOnEntitySpawned(CEntityInstance entity)
-    {
-        if (entity.Entity is null || entity.Entity.DesignerName.EndsWith("_projectile") == false)
-        {
-            return;
-        }
-
-        Server.NextFrame(() =>
-        {
-            var projectile = new CBaseCSGrenadeProjectile(entity.Handle);
-            if (projectile.Thrower.Value?.Controller.Value is null)
-            {
-                _logger.LogError("Failed to get projectile thrower");
-                return;
-            }
-
-            var player = new CCSPlayerController(projectile.Thrower.Value.Controller.Value.Handle);
-            if (player.PlayerPawn.Value is null)
-            {
-                _logger.LogError("Failed to get pawn of thrower");
-                return;
-            }
-
-            var typeResult = projectile.GetGrenadeType();
-            if (typeResult.IsError)
-            {
-                _logger.LogError("Failed to get grenade type. {Error}", typeResult.ErrorMessage());
-                return;
-            }
-
-            // projectile.Globalname can be null.
-            // Wrong annotation from CounterStrikeSharp
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            // Return if its a artificially thrown grenade
-            if (projectile.Globalname is not null && projectile.Globalname.Equals("custom"))
-            {
-                return;
-            }
-
-            var playerPosition = Position.CopyFrom(player.PlayerPawn.Value);
-            var snapshot = new Grenade
-            {
-                Type = typeResult.Value,
-                ThrowPosition = playerPosition.Pos,
-                InitialPosition = projectile.InitialPosition,
-                Angle = playerPosition.Angle,
-                Velocity = projectile.InitialVelocity
-            };
-
-            // Add to last thrown grenades of player, if its a player thrown grenade
-            if (_lastThrownGrenade.TryGetValue(player, out var grenadeHistory))
-            {
-                grenadeHistory.AddNewEntry(snapshot);
-            }
-            else
-            {
-                if (_lastThrownGrenade.TryAdd(player, new GrenadeHistory(snapshot)) == false)
-                {
-                    _logger.LogError(
-                        "Failed to add last thrown grenade to history of player \"{PlayerName}\". This should never happen",
-                        player.PlayerName);
-                }
-            }
-
-            _entityIdToGrenade[entity.Index] = snapshot;
-        });
     }
 
     #region CommandHandlers
@@ -178,7 +93,6 @@ public class LastThrownGrenadeService : Base
         {
             return Errors.Fail("No grenade thrown yet");
         }
-
 
         var snapshot = grenadeHistory.Back(goBackByAmount);
         if (snapshot.IsError)
@@ -254,6 +168,98 @@ public class LastThrownGrenadeService : Base
 
     #endregion
 
+    public ErrorOr<Grenade> GetLastThrownGrenade(CCSPlayerController player)
+    {
+        if (_lastThrownGrenade.TryGetValue(player, out var grenadeHistory) == false)
+        {
+            return Errors.Fail("No grenades thrown yet");
+        }
+
+        return grenadeHistory.GetLatestSnapshotInHistory();
+    }
+
+    private void ListenerHandlerOnMapStart(string _)
+    {
+        _lastThrownGrenade.Clear();
+        _entityIdToGrenade.Clear();
+    }
+
+    private void ListenerHandlerOnEntitySpawned(CEntityInstance entity)
+    {
+        if (entity.Entity is null || entity.Entity.DesignerName.EndsWith("_projectile") == false)
+        {
+            return;
+        }
+
+        Server.NextFrame(() =>
+        {
+            var grenade = new CBaseCSGrenadeProjectile(entity.Handle);
+            if (grenade.Thrower.Value?.Controller.Value is null)
+            {
+                _logger.LogError("Failed to get projectile thrower");
+                return;
+            }
+
+            var player = new CCSPlayerController(grenade.Thrower.Value.Controller.Value.Handle);
+            if (player.PlayerPawn.Value is null)
+            {
+                _logger.LogError("Failed to get pawn of thrower");
+                return;
+            }
+
+            var typeResult = grenade.GetGrenadeType();
+            if (typeResult.IsError)
+            {
+                _logger.LogError("Failed to get grenade type. {Error}", typeResult.ErrorMessage());
+                return;
+            }
+
+            // projectile.Globalname can be null.
+            // Wrong annotation from CounterStrikeSharp
+            // Return if its artificially thrown grenade
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (grenade.Globalname is not null && grenade.Globalname.Equals("custom"))
+            {
+                return;
+            }
+
+            // Copy the current position/velocity, so it does not change after the snapshot is created
+            var playerPosition = Position.CopyFrom(player.PlayerPawn.Value);
+            var initialPosition = new Vector(grenade.InitialPosition.X, grenade.InitialPosition.Y,
+                grenade.InitialPosition.Z);
+            var initialVelocity = new Vector(grenade.InitialVelocity.X, grenade.InitialVelocity.Y,
+                grenade.InitialVelocity.Z);
+
+            var snapshot = new Grenade
+            {
+                Type = typeResult.Value,
+                ThrowPosition = playerPosition.Pos,
+                InitialPosition = initialPosition,
+                Angle = playerPosition.Angle,
+                Velocity = initialVelocity
+            };
+
+            // Add to last thrown grenades of player, if it's a player thrown grenade
+            if (_lastThrownGrenade.TryGetValue(player, out var grenadeHistory))
+            {
+                grenadeHistory.AddNewEntry(snapshot);
+            }
+            else
+            {
+                if (_lastThrownGrenade.TryAdd(player, new GrenadeHistory(snapshot)) == false)
+                {
+                    _logger.LogError(
+                        "Failed to add last thrown grenade to history of player \"{PlayerName}\". This should never happen",
+                        player.PlayerName);
+                }
+            }
+
+            _entityIdToGrenade[entity.Index] = snapshot;
+            _logger.LogInformation("{Player}({SteamId}) New grenade added to last thrown grenade", player.PlayerName,
+                player.SteamID);
+        });
+    }
+
 
     #region OnGrenadeDetonated
 
@@ -306,11 +312,12 @@ public class LastThrownGrenadeService : Base
 
     private void HandleOnDetonate(uint entityIndex, float x, float y, float z)
     {
-        if (_entityIdToGrenade.TryGetValue(entityIndex, out var grenade) == false)
+        if (_entityIdToGrenade.TryRemove(entityIndex, out var grenade) == false)
         {
             return;
         }
 
+        Console.WriteLine($"handle detonation: {x} {y} {z}");
         grenade.DetonationPosition = new Vector(x, y, z);
     }
 

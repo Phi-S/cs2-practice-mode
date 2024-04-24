@@ -14,7 +14,8 @@ public class SpawnService : Base
     private readonly CommandService _commandService;
     private readonly MessagingService _messagingService;
 
-    private MapSpawns? _mapSpawns;
+    private MapSpawns? _mapSpawnsCache;
+    private readonly object _mapSpawnCacheLock = new();
 
     public SpawnService(CommandService commandService,
         MessagingService messagingService)
@@ -25,7 +26,6 @@ public class SpawnService : Base
 
     public override void Load(BasePlugin plugin)
     {
-        plugin.RegisterListener<Listeners.OnMapStart>(ListenerHandlerOnMapStart);
         _commandService.RegisterCommand(
             ChatCommands.Spawn,
             CommandHandlerSpawn,
@@ -55,16 +55,20 @@ public class SpawnService : Base
         base.Load(plugin);
     }
 
-    private void ListenerHandlerOnMapStart(string _)
-    {
-        _mapSpawns = GetSpawnForCurrentMap();
-    }
-
     private MapSpawns GetSpawnForCurrentMap()
     {
-        var tSpawns = GetSpawns(CsTeam.Terrorist);
-        var ctSpawn = GetSpawns(CsTeam.CounterTerrorist);
-        return new MapSpawns(tSpawns, ctSpawn);
+        lock (_mapSpawnCacheLock)
+        {
+            if (_mapSpawnsCache is null || _mapSpawnsCache.Map != Server.MapName ||
+                _mapSpawnsCache.CounterTerroristSpawns.Count == 0 || _mapSpawnsCache.TerroristSpawns.Count == 0)
+            {
+                var tSpawns = GetSpawns(CsTeam.Terrorist);
+                var ctSpawn = GetSpawns(CsTeam.CounterTerrorist);
+                _mapSpawnsCache = new MapSpawns(Server.MapName, tSpawns, ctSpawn);
+            }
+
+            return _mapSpawnsCache;
+        }
     }
 
     private List<Position> GetSpawns(CsTeam team)
@@ -80,7 +84,7 @@ public class SpawnService : Base
         }
         else
         {
-            return new List<Position>();
+            return [];
         }
 
         var result = new List<Position>();
@@ -111,10 +115,7 @@ public class SpawnService : Base
 
     private ErrorOr<Success> TeleportToTeamSpawn(CCSPlayerController player, int spawnNumber, CsTeam team = CsTeam.None)
     {
-        if (_mapSpawns is null)
-        {
-            return Errors.Fail("Failed to get spawn for current map");
-        }
+        var mapSpawns = GetSpawnForCurrentMap();
 
         if (spawnNumber <= 0)
         {
@@ -128,11 +129,11 @@ public class SpawnService : Base
         List<Position> spawns;
         if (targetTeam == CsTeam.Terrorist)
         {
-            spawns = _mapSpawns.TerroristSpawns;
+            spawns = mapSpawns.TerroristSpawns;
         }
         else if (targetTeam == CsTeam.CounterTerrorist)
         {
-            spawns = _mapSpawns.CounterTerroristSpawns;
+            spawns = mapSpawns.CounterTerroristSpawns;
         }
         else
         {
@@ -169,19 +170,16 @@ public class SpawnService : Base
             return Errors.Fail("Player pawn not valid");
         }
 
-        if (_mapSpawns is null)
-        {
-            return Errors.Fail("Failed to get spawn for current map");
-        }
+        var mapSpawns = GetSpawnForCurrentMap();
 
         List<Position> spawns;
         if (player.Team == CsTeam.Terrorist)
         {
-            spawns = _mapSpawns.TerroristSpawns;
+            spawns = mapSpawns.TerroristSpawns;
         }
         else if (player.Team == CsTeam.CounterTerrorist)
         {
-            spawns = _mapSpawns.CounterTerroristSpawns;
+            spawns = mapSpawns.CounterTerroristSpawns;
         }
         else
         {
@@ -222,19 +220,16 @@ public class SpawnService : Base
             return Errors.Fail("Player pawn not valid");
         }
 
-        if (_mapSpawns is null)
-        {
-            return Errors.Fail("Failed to get spawn for current map");
-        }
+        var mapSpawns = GetSpawnForCurrentMap();
 
         List<Position> spawns;
         if (player.Team == CsTeam.Terrorist)
         {
-            spawns = _mapSpawns.TerroristSpawns;
+            spawns = mapSpawns.TerroristSpawns;
         }
         else if (player.Team == CsTeam.CounterTerrorist)
         {
-            spawns = _mapSpawns.CounterTerroristSpawns;
+            spawns = mapSpawns.CounterTerroristSpawns;
         }
         else
         {

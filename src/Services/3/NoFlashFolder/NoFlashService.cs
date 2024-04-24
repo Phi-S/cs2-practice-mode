@@ -10,7 +10,7 @@ public class NoFlashService : Base
 {
     private readonly CommandService _commandService;
     private readonly MessagingService _messagingService;
-    private readonly List<CCSPlayerController> _noFlashList = new();
+    private readonly List<CCSPlayerController> _noFlashList = [];
 
     private readonly object _noFlashListLock = new();
 

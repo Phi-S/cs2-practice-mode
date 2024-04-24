@@ -35,6 +35,8 @@ public class TimerService : Base
         _cancellationTokenSource = new CancellationTokenSource();
         _backgroundTask = BackgroundTask();
 
+        plugin.RegisterListener<Listeners.OnMapStart>(ListenersHandlerOnMapStart);
+
         _commandService.RegisterCommand(ChatCommands.Timer,
             CommandHandlerTimer,
             ArgOption.NoArgs(
@@ -136,6 +138,23 @@ public class TimerService : Base
         }
 
         return Result.Success;
+    }
+
+    private void ListenersHandlerOnMapStart(string _)
+    {
+        foreach (var timer in Timer)
+        {
+            _messagingService.HideCenterHtml(timer.Key, timer.Value.print);
+        }
+
+        Timer.Clear();
+
+        foreach (var timer in Timer2)
+        {
+            _messagingService.HideCenterHtml(timer.Key, timer.Value.print);
+        }
+
+        Timer2.Clear();
     }
 
     private void Hide(CCSPlayerController player)

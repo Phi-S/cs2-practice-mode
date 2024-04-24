@@ -30,20 +30,18 @@ public class CommandService : Base
 
         RegisterCommand(ChatCommands.Help,
             CommandActionHelp,
-            new[]
-            {
+            [
                 ArgOption.NoArgs("Print all available commands"),
                 ArgOption.String("Print help for command", "command")
-            });
+            ]);
 
         RegisterCommand(ChatCommands.Alias,
             CommandActionPlayerAlias,
-            new[]
-            {
+            [
                 ArgOption.String("Displays the command behind the alias", "alias"),
                 ArgOption.StringString("Creates new player alias", "alias", "command")
-            },
-            new[] { Permissions.Flags.Alias });
+            ],
+            [Permissions.Flags.Alias]);
 
         RegisterCommand(ChatCommands.RemoveAlias,
             CommandActionDeregisterPlayerAlias,
@@ -52,12 +50,11 @@ public class CommandService : Base
 
         RegisterCommand(ChatCommands.GlobalAlias,
             CommandActionGlobalAlias,
-            new[]
-            {
+            [
                 ArgOption.String("Displays the command behind the global alias", "alias"),
                 ArgOption.StringString("Creates new global alias", "alias", "command")
-            },
-            new[] { Permissions.Flags.GlobalAlias });
+            ],
+            [Permissions.Flags.GlobalAlias]);
 
         RegisterCommand(ChatCommands.RemoveGlobalAlias,
             CommandActionDeregisterGlobalAlias,
@@ -233,8 +230,8 @@ public class CommandService : Base
         RegisterCommand(
             command,
             commandAction,
-            new[] { argOptions },
-            new[] { requiredFlag }
+            [argOptions],
+            [requiredFlag]
         );
     }
 
@@ -428,7 +425,7 @@ public class CommandService : Base
                 .Any(o => o.Args.Length == 1 && o.Args.First().Type == ArgType.Any) &&
             args.Length >= 1)
         {
-            args = new[] { string.Join(" ", args) };
+            args = [string.Join(" ", args)];
         }
         else
         {

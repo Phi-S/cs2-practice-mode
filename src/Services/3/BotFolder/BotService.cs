@@ -19,7 +19,7 @@ public partial class BotService : Base
     private readonly ILogger<BotService> _logger;
     private readonly MessagingService _messagingService;
 
-    private readonly ConcurrentBag<Timer> _timers = new();
+    private readonly ConcurrentBag<Timer> _timers = [];
     private readonly ConcurrentDictionary<int, BotInfo> _spawnedBots = new();
 
     public BotService(ILogger<BotService> logger, CommandService commandService, MessagingService messagingService)
@@ -31,6 +31,7 @@ public partial class BotService : Base
 
     public override void Load(BasePlugin plugin)
     {
+        plugin.RegisterListener<Listeners.OnMapStart>(ListenersHandlerOnMapStart);
         plugin.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
 
         _commandService.RegisterCommand(ChatCommands.Bot,
@@ -91,6 +92,18 @@ public partial class BotService : Base
 
         _spawnedBots.Clear();
         base.Unload(plugin);
+    }
+
+    private void ListenersHandlerOnMapStart(string _)
+    {
+        foreach (var timer in _timers)
+        {
+            timer.Kill();
+        }
+
+        _timers.Clear();
+
+        _spawnedBots.Clear();
     }
 
     private void AddTimer(float interval, Action callback, TimerFlags? flags = null)
