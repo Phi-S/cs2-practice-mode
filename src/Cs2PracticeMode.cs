@@ -82,9 +82,10 @@ public class Cs2PracticeMode : BasePlugin
     }
 
     public override string ModuleName => Assembly.GetExecutingAssembly().GetName().Name ??
-                                         throw new NullReferenceException("AssemblyName");
+                                         throw new ArgumentNullException(ModuleName);
 
-    public override string ModuleVersion => File.ReadAllText(Path.Combine(ModuleDirectory, "VERSION"));
+    public override string ModuleVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ??
+                                            throw new ArgumentNullException(ModuleVersion);
 
     public override void Load(bool hotReload)
     {

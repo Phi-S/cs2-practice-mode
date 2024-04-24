@@ -28,9 +28,6 @@
         <None Update="Cs2PracticeMode.cfg">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="VERSION">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
     </ItemGroup>
 
     <ItemGroup>
