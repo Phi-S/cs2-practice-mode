@@ -24,19 +24,9 @@ jobs:
       with:
         scheme: semver
         increment: patch
-        
-    - name: Modify VERSION
-      uses: jaywcjlove/github-action-modify-file-content@main
-      with:
-        path: VERSION
-        body: "${{ steps.version.outputs.version }}"
-        overwrite: 'true'
-
-    - name: Modify checkout VERSION
-      run: echo "${{ steps.version.outputs.version }}" > VERSION
     
     - name: build
-      run: dotnet publish ./src --output Cs2PracticeMode
+      run: dotnet publish /p:AssemblyVersion=${{ steps.version.outputs.version }} ./src --output Cs2PracticeMode
 
     - name: generate linux asset name
       id : linux-asset-name
