@@ -12,28 +12,42 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+    
     - name: setup
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
-    - name: build
-      run: dotnet publish ./src --output Cs2PracticeMode
+        dotnet-version: 8.0.x
+        
     - name: version
       uses: reecetech/version-increment@2023.9.3
       id: version
       with:
         scheme: semver
         increment: patch
+        
+    - name: Modify VERSION
+      uses: jaywcjlove/github-action-modify-file-content@main
+      with:
+        path: VERSION
+        body: "${{ steps.version.outputs.version }}"
+        overwrite: 'true'
+        
+    - name: build
+      run: dotnet publish ./src --output Cs2PracticeMode
+
     - name: generate linux asset name
       id : linux-asset-name
       run: echo "NAME=cs2-practice-mode-linux-${{ steps.version.outputs.version }}.tar.gz" >> $GITHUB_OUTPUT
+    
     - name: prepare release artifact
       run: tar -czvf ${{ steps.linux-asset-name.outputs.NAME }} Cs2PracticeMode
+   
     - name: upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.linux-asset-name.outputs.NAME }}
         path: ${{ steps.linux-asset-name.outputs.NAME }}
+    
     - name: release
       uses: softprops/action-gh-release@v2
       with:
