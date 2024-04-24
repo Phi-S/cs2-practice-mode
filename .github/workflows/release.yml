@@ -32,7 +32,8 @@ jobs:
         body: "${{ steps.version.outputs.version }}"
         overwrite: 'true'
 
-    - uses: actions/checkout@v4
+    - name: Modify checkout VERSION
+      run: echo "${{ steps.version.outputs.version }}" > VERSION
     
     - name: build
       run: dotnet publish ./src --output Cs2PracticeMode
