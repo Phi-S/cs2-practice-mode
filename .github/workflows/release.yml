@@ -26,7 +26,7 @@ jobs:
         increment: patch
     
     - name: build
-      run: dotnet publish /p:AssemblyVersion=1.${{ steps.version.outputs.version }} ./src --output Cs2PracticeMode
+      run: dotnet publish /p:AssemblyVersion=${{ steps.version.outputs.version }} ./src --output Cs2PracticeMode
 
     - name: generate linux asset name
       id : linux-asset-name
