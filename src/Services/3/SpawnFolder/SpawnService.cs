@@ -1,4 +1,5 @@
-﻿using CounterStrikeSharp.API;
+﻿using System.Drawing;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using Cs2PracticeMode.Constants;
@@ -17,8 +18,7 @@ public class SpawnService : Base
     private MapSpawns? _mapSpawnsCache;
     private readonly object _mapSpawnCacheLock = new();
 
-    public SpawnService(CommandService commandService,
-        MessagingService messagingService)
+    public SpawnService(CommandService commandService, MessagingService messagingService)
     {
         _commandService = commandService;
         _messagingService = messagingService;
@@ -26,6 +26,12 @@ public class SpawnService : Base
 
     public override void Load(BasePlugin plugin)
     {
+        plugin.RegisterEventHandler<EventRoundStart>((_, _) =>
+        {
+            MarkSpawns();
+            return HookResult.Continue;
+        });
+
         _commandService.RegisterCommand(
             ChatCommands.Spawn,
             CommandHandlerSpawn,
@@ -160,51 +166,57 @@ public class SpawnService : Base
         return Result.Success;
     }
 
-
     #region CommandHandlers
 
-    private ErrorOr<Success> CommandHandlerWorstSpawn(CCSPlayerController player, CommandInfo commandInfo)
+    private ErrorOr<Success> CommandHandlerSpawn(CCSPlayerController player, CommandInfo commandInfo)
     {
-        if (player.PlayerPawn.Value is null)
+        var spawnNumberResult = commandInfo.GetArgUInt();
+        if (spawnNumberResult.IsError)
         {
-            return Errors.Fail("Player pawn not valid");
+            return spawnNumberResult.FirstError;
         }
 
-        var mapSpawns = GetSpawnForCurrentMap();
+        var spawnNumber = (int)spawnNumberResult.Value;
 
-        List<Position> spawns;
-        if (player.Team == CsTeam.Terrorist)
+        var teleportResult = TeleportToTeamSpawn(player, spawnNumber);
+        if (teleportResult.IsError)
         {
-            spawns = mapSpawns.TerroristSpawns;
-        }
-        else if (player.Team == CsTeam.CounterTerrorist)
-        {
-            spawns = mapSpawns.CounterTerroristSpawns;
-        }
-        else
-        {
-            return Errors.Fail($"Cant get spawn for team \"{player.Team.ToString()}\"");
+            return teleportResult.FirstError;
         }
 
-        var playerPosition = Position.CopyFrom(player.PlayerPawn.Value);
-        (int spawnNumber, float distance)? worst = null;
-        for (var i = 0; i < spawns.Count; i++)
-        {
-            var spawn = spawns[i];
-            var distance = playerPosition.AbsolutDistance(spawn);
+        return Result.Success;
+    }
 
-            if (worst is null || worst.Value.distance < distance)
-            {
-                worst = (i + 1, distance);
-            }
+    private ErrorOr<Success> CommandHandlerCtSpawn(CCSPlayerController player, CommandInfo commandInfo)
+    {
+        var spawnNumberResult = commandInfo.GetArgUInt();
+        if (spawnNumberResult.IsError)
+        {
+            return spawnNumberResult.FirstError;
         }
 
-        if (worst is null)
+        var spawnNumber = (int)spawnNumberResult.Value;
+
+        var teleportResult = TeleportToTeamSpawn(player, spawnNumber, CsTeam.CounterTerrorist);
+        if (teleportResult.IsError)
         {
-            return Errors.Fail("Failed to find worst spawn");
+            return teleportResult.FirstError;
         }
 
-        var teleportResult = TeleportToTeamSpawn(player, worst.Value.spawnNumber);
+        return Result.Success;
+    }
+
+    private ErrorOr<Success> CommandHandlerTSpawn(CCSPlayerController player, CommandInfo commandInfo)
+    {
+        var spawnNumberResult = commandInfo.GetArgUInt();
+        if (spawnNumberResult.IsError)
+        {
+            return spawnNumberResult.FirstError;
+        }
+
+        var spawnNumber = (int)spawnNumberResult.Value;
+
+        var teleportResult = TeleportToTeamSpawn(player, spawnNumber, CsTeam.Terrorist);
         if (teleportResult.IsError)
         {
             return teleportResult.FirstError;
@@ -263,55 +275,48 @@ public class SpawnService : Base
         return Result.Success;
     }
 
-    private ErrorOr<Success> CommandHandlerCtSpawn(CCSPlayerController player, CommandInfo commandInfo)
+    private ErrorOr<Success> CommandHandlerWorstSpawn(CCSPlayerController player, CommandInfo commandInfo)
     {
-        var spawnNumberResult = commandInfo.GetArgUInt();
-        if (spawnNumberResult.IsError)
+        if (player.PlayerPawn.Value is null)
         {
-            return spawnNumberResult.FirstError;
+            return Errors.Fail("Player pawn not valid");
         }
 
-        var spawnNumber = (int)spawnNumberResult.Value;
+        var mapSpawns = GetSpawnForCurrentMap();
 
-        var teleportResult = TeleportToTeamSpawn(player, spawnNumber, CsTeam.CounterTerrorist);
-        if (teleportResult.IsError)
+        List<Position> spawns;
+        if (player.Team == CsTeam.Terrorist)
         {
-            return teleportResult.FirstError;
+            spawns = mapSpawns.TerroristSpawns;
+        }
+        else if (player.Team == CsTeam.CounterTerrorist)
+        {
+            spawns = mapSpawns.CounterTerroristSpawns;
+        }
+        else
+        {
+            return Errors.Fail($"Cant get spawn for team \"{player.Team.ToString()}\"");
         }
 
-        return Result.Success;
-    }
-
-    private ErrorOr<Success> CommandHandlerTSpawn(CCSPlayerController player, CommandInfo commandInfo)
-    {
-        var spawnNumberResult = commandInfo.GetArgUInt();
-        if (spawnNumberResult.IsError)
+        var playerPosition = Position.CopyFrom(player.PlayerPawn.Value);
+        (int spawnNumber, float distance)? worst = null;
+        for (var i = 0; i < spawns.Count; i++)
         {
-            return spawnNumberResult.FirstError;
+            var spawn = spawns[i];
+            var distance = playerPosition.AbsolutDistance(spawn);
+
+            if (worst is null || worst.Value.distance < distance)
+            {
+                worst = (i + 1, distance);
+            }
         }
 
-        var spawnNumber = (int)spawnNumberResult.Value;
-
-        var teleportResult = TeleportToTeamSpawn(player, spawnNumber, CsTeam.Terrorist);
-        if (teleportResult.IsError)
+        if (worst is null)
         {
-            return teleportResult.FirstError;
+            return Errors.Fail("Failed to find worst spawn");
         }
 
-        return Result.Success;
-    }
-
-    private ErrorOr<Success> CommandHandlerSpawn(CCSPlayerController player, CommandInfo commandInfo)
-    {
-        var spawnNumberResult = commandInfo.GetArgUInt();
-        if (spawnNumberResult.IsError)
-        {
-            return spawnNumberResult.FirstError;
-        }
-
-        var spawnNumber = (int)spawnNumberResult.Value;
-
-        var teleportResult = TeleportToTeamSpawn(player, spawnNumber);
+        var teleportResult = TeleportToTeamSpawn(player, worst.Value.spawnNumber);
         if (teleportResult.IsError)
         {
             return teleportResult.FirstError;
@@ -321,4 +326,58 @@ public class SpawnService : Base
     }
 
     #endregion
+
+    private void MarkSpawns()
+    {
+        var spawns = GetSpawnForCurrentMap();
+        foreach (var spawn in spawns.TerroristSpawns.Concat(spawns.CounterTerroristSpawns))
+        {
+            var color = Color.FromArgb(255, 0, 255, 0);
+            const float width = 1;
+            const float length = 10;
+            var height = spawn.Pos.Z;
+            const float offset = 1;
+
+            // Top line
+            var start = new Vector(spawn.Pos.X - length - offset, spawn.Pos.Y + length, height);
+            var end = new Vector(spawn.Pos.X + length + offset, spawn.Pos.Y + length, height);
+            DrawLaser(start, end, width, color);
+
+            // Bottom line
+            start = new Vector(spawn.Pos.X - length - offset, spawn.Pos.Y - length, height);
+            end = new Vector(spawn.Pos.X + length + offset, spawn.Pos.Y - length, height);
+            DrawLaser(start, end, width, color);
+
+            // Left line
+            start = new Vector(spawn.Pos.X - length, spawn.Pos.Y + length + offset, height);
+            end = new Vector(spawn.Pos.X - length, spawn.Pos.Y - length - offset, height);
+            DrawLaser(start, end, width, color);
+
+            // Right line
+            start = new Vector(spawn.Pos.X + length, spawn.Pos.Y + length + offset, height);
+            end = new Vector(spawn.Pos.X + length, spawn.Pos.Y - length - offset, height);
+            DrawLaser(start, end, width, color);
+        }
+    }
+
+    private static void DrawLaser(Vector start, Vector end, float width, Color colour)
+    {
+        var laser = Utilities.CreateEntityByName<CEnvBeam>("env_beam");
+        if (laser == null)
+        {
+            return;
+        }
+
+        laser.Render = colour;
+        laser.Width = width;
+
+        laser.Teleport(start, new QAngle(0.0f, 0.0f, 0.0f), new Vector(0.0f, 0.0f, 0.0f));
+        laser.EndPos.X = end.X;
+        laser.EndPos.Y = end.Y;
+        laser.EndPos.Z = end.Z;
+
+        Utilities.SetStateChanged(laser, "CBeam", "m_vecEndPos");
+
+        laser.DispatchSpawn();
+    }
 }
