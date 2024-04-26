@@ -61,7 +61,7 @@ public partial class GrenadeMenuService
             grenadeToThrow = getResult.Value;
         }
 
-        var throwGrenade = grenadeToThrow.ThrowGrenade(player);
+        var throwGrenade = grenadeToThrow.ThrowGrenadeAndAddToLastThrownGrenades(player);
         if (throwGrenade.IsError)
         {
             return throwGrenade.FirstError;

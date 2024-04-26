@@ -3,34 +3,79 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using Cs2PracticeMode.Constants;
+using Cs2PracticeMode.Services._1.SettingsStorageFolder;
 using Cs2PracticeMode.Services._2.CommandFolder;
 using Cs2PracticeMode.Services._2.MessagingFolder;
 using Cs2PracticeMode.SharedModels;
 using ErrorOr;
+using Microsoft.Extensions.Logging;
 
 namespace Cs2PracticeMode.Services._3.SpawnFolder;
 
 public class SpawnService : Base
 {
+    private readonly ILogger<SpawnService> _logger;
     private readonly CommandService _commandService;
     private readonly MessagingService _messagingService;
+    private readonly SettingsStorageService _settingsStorageService;
 
     private MapSpawns? _mapSpawnsCache;
     private readonly object _mapSpawnCacheLock = new();
 
-    public SpawnService(CommandService commandService, MessagingService messagingService)
+    private readonly List<int> _spawnMarkerLaserEntityIds = [];
+    private bool _shouldMarkSpawns = true;
+
+    public SpawnService(ILogger<SpawnService> logger, CommandService commandService, MessagingService messagingService,
+        SettingsStorageService settingsStorageService)
     {
+        _logger = logger;
         _commandService = commandService;
         _messagingService = messagingService;
+        _settingsStorageService = settingsStorageService;
     }
 
     public override void Load(BasePlugin plugin)
     {
         plugin.RegisterEventHandler<EventRoundStart>((_, _) =>
         {
-            MarkSpawns();
+            if (_shouldMarkSpawns)
+            {
+                MarkSpawns();
+            }
+
             return HookResult.Continue;
         });
+
+        _settingsStorageService.OnSettingsUpdated += settings =>
+        {
+            if (settings.DisableSpawnMarker == false)
+            {
+                if (_shouldMarkSpawns)
+                {
+                    return;
+                }
+
+                MarkSpawns();
+                _shouldMarkSpawns = true;
+
+                return;
+            }
+
+            if (_shouldMarkSpawns && _spawnMarkerLaserEntityIds.Count != 0)
+            {
+                foreach (var spawnMarkerLaserEntityId in _spawnMarkerLaserEntityIds)
+                {
+                    var entity = Utilities.GetEntityFromIndex<CBaseEntity>(spawnMarkerLaserEntityId);
+
+                    if (entity.DesignerName == "env_beam")
+                    {
+                        entity.Remove();
+                    }
+                }
+            }
+
+            _shouldMarkSpawns = false;
+        };
 
         _commandService.RegisterCommand(
             ChatCommands.Spawn,
@@ -330,6 +375,7 @@ public class SpawnService : Base
     private void MarkSpawns()
     {
         var spawns = GetSpawnForCurrentMap();
+        _spawnMarkerLaserEntityIds.Clear();
         foreach (var spawn in spawns.TerroristSpawns.Concat(spawns.CounterTerroristSpawns))
         {
             var color = Color.FromArgb(255, 0, 255, 0);
@@ -341,31 +387,43 @@ public class SpawnService : Base
             // Top line
             var start = new Vector(spawn.Pos.X - length - offset, spawn.Pos.Y + length, height);
             var end = new Vector(spawn.Pos.X + length + offset, spawn.Pos.Y + length, height);
-            DrawLaser(start, end, width, color);
+            var topLine = DrawLaser(start, end, width, color);
 
             // Bottom line
             start = new Vector(spawn.Pos.X - length - offset, spawn.Pos.Y - length, height);
             end = new Vector(spawn.Pos.X + length + offset, spawn.Pos.Y - length, height);
-            DrawLaser(start, end, width, color);
+            var bottomLine = DrawLaser(start, end, width, color);
 
             // Left line
             start = new Vector(spawn.Pos.X - length, spawn.Pos.Y + length + offset, height);
             end = new Vector(spawn.Pos.X - length, spawn.Pos.Y - length - offset, height);
-            DrawLaser(start, end, width, color);
+            var leftLine = DrawLaser(start, end, width, color);
 
             // Right line
             start = new Vector(spawn.Pos.X + length, spawn.Pos.Y + length + offset, height);
             end = new Vector(spawn.Pos.X + length, spawn.Pos.Y - length - offset, height);
-            DrawLaser(start, end, width, color);
+            var rightLine = DrawLaser(start, end, width, color);
+
+            if (topLine is null || bottomLine is null || leftLine is null || rightLine is null)
+            {
+                _logger.LogError("Failed to mark spawn");
+            }
+            else
+            {
+                _spawnMarkerLaserEntityIds.Add((int)topLine.Value);
+                _spawnMarkerLaserEntityIds.Add((int)bottomLine.Value);
+                _spawnMarkerLaserEntityIds.Add((int)leftLine.Value);
+                _spawnMarkerLaserEntityIds.Add((int)rightLine.Value);
+            }
         }
     }
 
-    private static void DrawLaser(Vector start, Vector end, float width, Color colour)
+    private static uint? DrawLaser(Vector start, Vector end, float width, Color colour)
     {
         var laser = Utilities.CreateEntityByName<CEnvBeam>("env_beam");
         if (laser == null)
         {
-            return;
+            return null;
         }
 
         laser.Render = colour;
@@ -379,5 +437,6 @@ public class SpawnService : Base
         Utilities.SetStateChanged(laser, "CBeam", "m_vecEndPos");
 
         laser.DispatchSpawn();
+        return laser.Index;
     }
 }

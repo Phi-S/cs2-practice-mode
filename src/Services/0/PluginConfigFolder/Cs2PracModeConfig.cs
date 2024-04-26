@@ -15,5 +15,6 @@ public class Cs2PracModeConfig : BasePluginConfig
     [JsonPropertyName("EnableFakeRcon")] public bool EnableFakeRcon { get; set; } = false;
 
     [JsonPropertyName("FakeRconPassword")] public string FakeRconPassword { get; set; } = "";
+
     [JsonPropertyName("DataLocation")] public string DataLocation { get; set; } = "";
 }

@@ -10,7 +10,9 @@ namespace Cs2PracticeMode.Services._1.SettingsStorageFolder;
 public class SettingsStorageService : Base
 {
     private readonly PluginConfigService _pluginConfigService;
+
     private Settings _settings = null!;
+    public event Action<Settings>? OnSettingsUpdated;
 
     private IStorageSingle<Settings> _storage = null!;
 
@@ -83,6 +85,7 @@ public class SettingsStorageService : Base
         }
 
         _settings = settings;
+        OnSettingsUpdated?.Invoke(_settings);
         return update.Value;
     }
 }

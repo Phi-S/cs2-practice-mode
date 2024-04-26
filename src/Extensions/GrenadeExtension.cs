@@ -46,6 +46,13 @@ public static class GrenadeExtension
             grenade.Velocity.ToCsVector());
     }
 
+    public static ErrorOr<Success> ThrowGrenadeAndAddToLastThrownGrenades(this GrenadeJsonModel grenade,
+        CCSPlayerController player)
+    {
+        return ThrowGrenade(player, grenade.Type, grenade.InitialPosition.ToCsVector(), grenade.Angle.ToQAngle(),
+            grenade.Velocity.ToCsVector(), grenade.Name);
+    }
+
     private static readonly MemoryFunctionWithReturn<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int>
         CSmokeGrenadeProjectileCreateFuncLinux =
             new(
@@ -56,7 +63,8 @@ public static class GrenadeExtension
         GrenadeType_t grenadeType,
         Vector initialPosition,
         QAngle angle,
-        Vector velocity)
+        Vector velocity,
+        string grenadeName = "custom")
     {
         if (player.IsValid == false)
         {
@@ -106,19 +114,19 @@ public static class GrenadeExtension
         createdGrenade.IsLive = false;
         createdGrenade.DmgRadius = 350.0f;
         createdGrenade.Damage = 99.0f;
-        
+
         createdGrenade.InitialPosition.X = initialPosition.X;
         createdGrenade.InitialPosition.Y = initialPosition.Y;
         createdGrenade.InitialPosition.Z = initialPosition.Z;
-        
+
         createdGrenade.InitialVelocity.X = velocity.X;
         createdGrenade.InitialVelocity.Y = velocity.Y;
         createdGrenade.InitialVelocity.Z = velocity.Z;
-        
+
         createdGrenade.Teleport(initialPosition, angle, velocity);
         createdGrenade.DispatchSpawn();
-        
-        createdGrenade.Globalname = "custom";
+
+        createdGrenade.Globalname = grenadeName;
         createdGrenade.AcceptInput("FireUser1", player, player);
         createdGrenade.AcceptInput("InitializeSpawnFromWorld");
         createdGrenade.TeamNum = player.TeamNum;

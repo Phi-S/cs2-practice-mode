@@ -101,6 +101,19 @@ public class SettingsMenuService : Base
                         : $"Player damage pints are now {EnabledOrDisabledString(settings.DisableDamagePrint)}");
             });
 
+        htmlMenu.AddMenuOption("Enable/Disable spawn marker",
+            (selectPlayer, _) =>
+            {
+                var settings = _settingsStorageService.Get();
+                settings.DisableSpawnMarker = !settings.DisableSpawnMarker;
+
+                var update = _settingsStorageService.Update(settings);
+                _messagingService.MsgToPlayerChat(selectPlayer,
+                    update.IsError
+                        ? $"Failed to update settings. {update.ErrorMessage()}"
+                        : $"Player spawn markers are now {EnabledOrDisabledString(settings.DisableSpawnMarker)}");
+            });
+
         var openHtmlMenu = _messagingService.OpenHtmlMenu(player, htmlMenu);
         if (openHtmlMenu.IsError)
         {

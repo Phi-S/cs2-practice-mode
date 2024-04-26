@@ -7,6 +7,7 @@ public class Settings : ICloneable, IData
     public bool DisableSmokeColors { get; set; }
     public bool DisableBlindTimePrint { get; set; }
     public bool DisableDamagePrint { get; set; }
+    public bool DisableSpawnMarker { get; set; }
 
     public object Clone()
     {
