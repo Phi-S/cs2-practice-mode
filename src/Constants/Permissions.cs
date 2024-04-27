@@ -19,7 +19,7 @@ public static class Permissions
         public static readonly string RemoveGlobalAlias = GetFlag("removeglobalalias");
 
         public static readonly string Bot = GetFlag("bot");
-        public static readonly string ClearBots = GetFlag("ClearBots");
+        public static readonly string ClearBots = GetFlag("clearbots");
 
         public static readonly string Break = GetFlag("break");
 
@@ -47,8 +47,6 @@ public static class Permissions
         public static readonly string Settings = GetFlag("settings");
 
         public static readonly string Spawn = GetFlag("spawn");
-
-        public static readonly string SwapTeam = GetFlag("swap");
 
         public static readonly string Timer = GetFlag("timer");
     }

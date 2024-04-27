@@ -67,8 +67,6 @@ public static class ChatCommands
     public const string BestSpawn = "bestspawn";
     public const string WorstSpawn = "worstspawn";
 
-    public const string SwapTeam = "swap";
-
     public const string Timer = "timer";
     public const string Timer2 = "timer2";
 }

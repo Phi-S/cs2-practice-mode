@@ -184,6 +184,21 @@ public class LastThrownGrenadeService : Base
         _entityIdToGrenade.Clear();
     }
 
+    public void AddToLastThrownGrenades(CCSPlayerController player, Grenade grenade)
+    {
+        if (_lastThrownGrenade.TryGetValue(player, out var grenadeHistory))
+        {
+            grenadeHistory.AddNewEntry(grenade);
+        }
+        else
+        {
+            _lastThrownGrenade[player] = new GrenadeHistory(grenade);
+        }
+
+        _logger.LogInformation("{Player}({SteamId}) New grenade added to last thrown grenades", player.PlayerName,
+            player.SteamID);
+    }
+
     private void ListenerHandlerOnEntitySpawned(CEntityInstance entity)
     {
         if (entity.Entity is null || entity.Entity.DesignerName.EndsWith("_projectile") == false)
@@ -239,24 +254,8 @@ public class LastThrownGrenadeService : Base
                 Velocity = initialVelocity
             };
 
-            // Add to last thrown grenades of player, if it's a player thrown grenade
-            if (_lastThrownGrenade.TryGetValue(player, out var grenadeHistory))
-            {
-                grenadeHistory.AddNewEntry(snapshot);
-            }
-            else
-            {
-                if (_lastThrownGrenade.TryAdd(player, new GrenadeHistory(snapshot)) == false)
-                {
-                    _logger.LogError(
-                        "Failed to add last thrown grenade to history of player \"{PlayerName}\". This should never happen",
-                        player.PlayerName);
-                }
-            }
-
+            AddToLastThrownGrenades(player, snapshot);
             _entityIdToGrenade[entity.Index] = snapshot;
-            _logger.LogInformation("{Player}({SteamId}) New grenade added to last thrown grenade", player.PlayerName,
-                player.SteamID);
         });
     }
 
@@ -317,7 +316,6 @@ public class LastThrownGrenadeService : Base
             return;
         }
 
-        Console.WriteLine($"handle detonation: {x} {y} {z}");
         grenade.DetonationPosition = new Vector(x, y, z);
     }
 

@@ -46,13 +46,6 @@ public static class GrenadeExtension
             grenade.Velocity.ToCsVector());
     }
 
-    public static ErrorOr<Success> ThrowGrenadeAndAddToLastThrownGrenades(this GrenadeJsonModel grenade,
-        CCSPlayerController player)
-    {
-        return ThrowGrenade(player, grenade.Type, grenade.InitialPosition.ToCsVector(), grenade.Angle.ToQAngle(),
-            grenade.Velocity.ToCsVector(), grenade.Name);
-    }
-
     private static readonly MemoryFunctionWithReturn<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int>
         CSmokeGrenadeProjectileCreateFuncLinux =
             new(
@@ -63,8 +56,7 @@ public static class GrenadeExtension
         GrenadeType_t grenadeType,
         Vector initialPosition,
         QAngle angle,
-        Vector velocity,
-        string grenadeName = "custom")
+        Vector velocity)
     {
         if (player.IsValid == false)
         {
@@ -126,7 +118,7 @@ public static class GrenadeExtension
         createdGrenade.Teleport(initialPosition, angle, velocity);
         createdGrenade.DispatchSpawn();
 
-        createdGrenade.Globalname = grenadeName;
+        createdGrenade.Globalname = "custom";
         createdGrenade.AcceptInput("FireUser1", player, player);
         createdGrenade.AcceptInput("InitializeSpawnFromWorld");
         createdGrenade.TeamNum = player.TeamNum;

@@ -2,9 +2,9 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using Cs2PracticeMode.Constants;
-using Cs2PracticeMode.Extensions;
 using Cs2PracticeMode.Services._1.GrenadeStorageFolder;
 using Cs2PracticeMode.Services._2.CommandFolder;
+using Cs2PracticeMode.Services._3.LastThrownGrenadeFolder;
 using ErrorOr;
 
 namespace Cs2PracticeMode.Services._3.GrenadeMenuFolder;
@@ -61,11 +61,18 @@ public partial class GrenadeMenuService
             grenadeToThrow = getResult.Value;
         }
 
-        var throwGrenade = grenadeToThrow.ThrowGrenadeAndAddToLastThrownGrenades(player);
-        if (throwGrenade.IsError)
+        // Adds the thrown grenade to the last thrown grenades so !rethrow and !last is working
+        var grenade = new Grenade
         {
-            return throwGrenade.FirstError;
-        }
+            Type = grenadeToThrow.Type,
+            ThrowPosition = grenadeToThrow.ThrowPosition.ToCsVector(),
+            InitialPosition = grenadeToThrow.InitialPosition.ToCsVector(),
+            Angle = grenadeToThrow.Angle.ToQAngle(),
+            Velocity = grenadeToThrow.Velocity.ToCsVector(),
+            DetonationPosition = grenadeToThrow.DetonationPosition.ToCsVector()
+        };
+
+        _lastThrownGrenadeService.AddToLastThrownGrenades(player, grenade);
 
         return Result.Success;
     }
