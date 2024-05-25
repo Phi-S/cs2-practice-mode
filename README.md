@@ -7,12 +7,12 @@
 ### Download and install [Metamod](https://www.sourcemm.net/downloads.php/?branch=master)
 
 - [How to install Metamod](https://wiki.alliedmods.net/Installing_Metamod:Source)
-- <em>Tested with version 2.0.0-git1290</em>
+- <em>Tested with version 2.0.0-git1293</em>
 
 ### Download and install [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp/releases)
 
 - [How to install CounterStrikeSharp](https://docs.cssharp.dev/docs/guides/getting-started.html)
-- <em>Tested with the version v228</em>
+- <em>Tested with the version v234</em>
 
 ### Download and install [cs2-practice-mode](https://github.com/Phi-S/cs2-practice-mode)
 

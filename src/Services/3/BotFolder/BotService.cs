@@ -349,7 +349,8 @@ public partial class BotService : Base
     private HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
     {
         var player = @event.Userid;
-        if (player.IsValid == false
+        if (player is null ||
+            player.IsValid == false
             || player.IsBot == false
             || player.UserId.HasValue == false
             || player.PlayerPawn.IsValid == false
