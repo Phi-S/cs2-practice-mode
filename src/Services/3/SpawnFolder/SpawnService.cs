@@ -67,7 +67,7 @@ public class SpawnService : Base
                 {
                     var entity = Utilities.GetEntityFromIndex<CBaseEntity>(spawnMarkerLaserEntityId);
 
-                    if (entity.DesignerName == "env_beam")
+                    if (entity?.DesignerName == "env_beam")
                     {
                         entity.Remove();
                     }

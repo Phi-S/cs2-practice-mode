@@ -34,7 +34,7 @@ public class PlayerDamageService : Base
         var attackerName = "";
         try
         {
-            attackerName = @event.Attacker.PlayerName;
+            attackerName = @event.Attacker?.PlayerName;
         }
         catch (ArgumentNullException)
         {
@@ -44,7 +44,7 @@ public class PlayerDamageService : Base
         }
 
         _messagingService.MsgToAll(
-            $"{ChatColors.Red}{attackerName}{ChatColors.White} damaged {ChatColors.Blue}{@event.Userid.PlayerName}{ChatColors.White} for {ChatColors.Green}{@event.DmgHealth}{ChatColors.White}hp with {ChatColors.Green}{@event.Weapon}");
+            $"{ChatColors.Red}{attackerName}{ChatColors.White} damaged {ChatColors.Blue}{@event.Userid?.PlayerName}{ChatColors.White} for {ChatColors.Green}{@event.DmgHealth}{ChatColors.White}hp with {ChatColors.Green}{@event.Weapon}");
         return HookResult.Continue;
     }
 }

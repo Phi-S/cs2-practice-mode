@@ -62,7 +62,7 @@ public class SmokeFlyTimeService : Base
         }
 
         _messagingService.MsgToAll(
-            $"Smoke thrown by {ChatColors.Blue}{@event.Userid.PlayerName}{ChatColors.White}" +
+            $"Smoke thrown by {ChatColors.Blue}{@event.Userid?.PlayerName}{ChatColors.White}" +
             $" took {ChatColors.Green}{(DateTime.UtcNow - result).TotalSeconds:0.00}{ChatColors.White} seconds");
 
         return HookResult.Continue;

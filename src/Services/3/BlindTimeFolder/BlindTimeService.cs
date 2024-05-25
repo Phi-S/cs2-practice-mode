@@ -32,7 +32,7 @@ public class BlindTimeService : Base
         }
 
         _messagingService.MsgToAll(
-            $"{ChatColors.Red}{@event.Attacker.PlayerName}{ChatColors.White} flashed {ChatColors.Blue}{@event.Userid.PlayerName}{ChatColors.White} for {ChatColors.Green}{@event.BlindDuration:0.00}s");
+            $"{ChatColors.Red}{@event.Attacker?.PlayerName}{ChatColors.White} flashed {ChatColors.Blue}{@event.Userid?.PlayerName}{ChatColors.White} for {ChatColors.Green}{@event.BlindDuration:0.00}s");
         return HookResult.Continue;
     }
 }
