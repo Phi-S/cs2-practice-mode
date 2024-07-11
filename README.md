@@ -12,7 +12,7 @@
 ### Download and install [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp/releases)
 
 - [How to install CounterStrikeSharp](https://docs.cssharp.dev/docs/guides/getting-started.html)
-- <em>Tested with the version v234</em>
+- <em>Tested with the version v247</em>
 
 ### Download and install [cs2-practice-mode](https://github.com/Phi-S/cs2-practice-mode)
 
