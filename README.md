@@ -7,12 +7,12 @@
 ### Download and install [Metamod](https://www.sourcemm.net/downloads.php/?branch=master)
 
 - [How to install Metamod](https://wiki.alliedmods.net/Installing_Metamod:Source)
-- <em>Tested with version 2.0.0-git1293</em>
+- <em>Tested with version 2.0.0-git1313</em>
 
 ### Download and install [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp/releases)
 
 - [How to install CounterStrikeSharp](https://docs.cssharp.dev/docs/guides/getting-started.html)
-- <em>Tested with the version v247</em>
+- <em>Tested with the version v264</em>
 
 ### Download and install [cs2-practice-mode](https://github.com/Phi-S/cs2-practice-mode)
 
@@ -40,6 +40,19 @@ storage folder or switch to postgres by providing a connection string.
 - `postgres#Host=127.0.0.1:32768;Database=cs2-practice-mode;Username=postgres;Password=123`
 
 ---
+
+## Config
+
+The default config should automatically be created at
+`/game/csgo/addons/counterstrikesharp/configs/plugins/Cs2PracticeMode/Cs2PracticeMode.json`
+
+| Option              | Default value                   | Description                                                                                                                                                                                                                                                                                                                                                            | 
+|---------------------|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ChatPrefix`        | `[\u0007Cs2PracticeMode]\u0001` | The prefix in front of chat messages send by the plugin                                                                                                                                                                                                                                                                                                                |
+| `EnablePermissions` | `false`                         | If set to true, it enables the [permission system](#permissions). With the permission system enabled no one on the server got access to any command unless defined with the [permission system](#permissions) system. <br/> If set to false, every player on the server got root permissions and can use any command without restrictions (except fake rcon commands). |
+| `EnableFakeRcon`    | `false`                         | If set to true, it enables the ability to execute rcon [commands](#commands) via chat message. <br/> `rcon [command(Any)]`                                                                                                                                                                                                                                             |
+| `FakeRconPassword`  | ``                              | The password you need to login for fake rcon commands. `rconlogin [fake rcon password(String)]`. <br/> After login you can send rcon command with `rcon [command(Any)]`                                                                                                                                                                                                |
+| `DataLocation`      | ``                              | The custom data location for saved settings, grenades etc. If empty the [default storage folder](#storage) will be used.                                                                                                                                                                                                                                               |
 
 ## Commands
 
@@ -113,7 +126,7 @@ storage folder or switch to postgres by providing a connection string.
 | Misc                         |                                                                                                 |
 |------------------------------|-------------------------------------------------------------------------------------------------|
 | break                        | Break all breakable props on the map                                                            |
-| noflash                      | Turns noflash on or of                                                                          |
+| noflash                      | Turns noflash on or off                                                                         |
 | timer                        | Start timer. If you start moving, the timer will start. If you stop moving, the timer will stop |
 | timer2                       | Start or stop timer                                                                             |
 | countdown [duration(Double)] | Starts a countdown                                                                              |
@@ -152,3 +165,9 @@ storage folder or switch to postgres by providing a connection string.
 | @Cs2PracticeMode/flash             | |
 | @Cs2PracticeMode/noflash           | |
 | @Cs2PracticeMode/timer             | |
+
+## Credits
+
+This plugin is heavily inspired by [csgo-practice-mode](https://github.com/splewis/csgo-practice-mode)
+
+Throw smoke memory function by [cs2-executes](https://github.com/zwolof/cs2-executes)
