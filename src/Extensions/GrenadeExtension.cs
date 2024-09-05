@@ -46,10 +46,16 @@ public static class GrenadeExtension
             grenade.Velocity.ToCsVector());
     }
 
-    private static readonly MemoryFunctionWithReturn<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int>
-        CSmokeGrenadeProjectileCreateFuncLinux =
-            new(
-                @"\x55\x4c\x89\xc1\x48\x89\xe5\x41\x57\x41\x56\x49\x89\xd6\x48\x89\xf2\x48\x89\xfe\x41\x55\x45\x89\xcd\x41\x54\x4d\x89\xc4\x53\x48\x83\xec\x28\x48\x89\x7d\xb8\x48");
+
+    // https://github.com/zwolof/cs2-executes/blob/321f329bacd8ab0a4ddfafc10d8f62741748b3ac/Memory.cs#L6
+    private static readonly MemoryFunctionWithReturn<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int,
+            CSmokeGrenadeProjectile>
+        CSmokeGrenadeProjectileCreateFunc = new(
+            Environment.OSVersion.Platform == PlatformID.Unix
+                ? @"\x55\x4C\x89\xC1\x48\x89\xE5\x41\x57\x41\x56\x49\x89\xD6"
+                : @"\x48\x89\x5C\x24\x2A\x48\x89\x6C\x24\x2A\x48\x89\x74\x24\x2A\x57\x41\x56\x41\x57\x48\x83\xEC\x50\x4C\x8B\xB4\x24"
+        );
+
 
     private static ErrorOr<Success> ThrowGrenade(
         CCSPlayerController player,
@@ -70,7 +76,7 @@ public static class GrenadeExtension
 
         if (grenadeType == GrenadeType_t.GRENADE_TYPE_SMOKE)
         {
-            CSmokeGrenadeProjectileCreateFuncLinux.Invoke(
+            CSmokeGrenadeProjectileCreateFunc.Invoke(
                 initialPosition.Handle,
                 initialPosition.Handle,
                 velocity.Handle,

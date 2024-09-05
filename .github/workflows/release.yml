@@ -5,45 +5,45 @@ name: release
 
 on:
   workflow_dispatch:
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: setup
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-        
-    - name: version
-      uses: reecetech/version-increment@2023.9.3
-      id: version
-      with:
-        scheme: semver
-        increment: patch
-    
-    - name: build
-      run: dotnet publish /p:AssemblyVersion=${{ steps.version.outputs.version }} ./src --output Cs2PracticeMode
+      - uses: actions/checkout@v4
 
-    - name: generate linux asset name
-      id : linux-asset-name
-      run: echo "NAME=cs2-practice-mode-linux-${{ steps.version.outputs.version }}.tar.gz" >> $GITHUB_OUTPUT
-    
-    - name: prepare release artifact
-      run: tar -czvf ${{ steps.linux-asset-name.outputs.NAME }} Cs2PracticeMode
-   
-    - name: upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ steps.linux-asset-name.outputs.NAME }}
-        path: ${{ steps.linux-asset-name.outputs.NAME }}
-    
-    - name: release
-      uses: softprops/action-gh-release@v2
-      with:
+      - name: setup
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: version
+        uses: reecetech/version-increment@2023.9.3
+        id: version
+        with:
+          scheme: semver
+          increment: patch
+
+      - name: build
+        run: dotnet publish /p:AssemblyVersion=${{ steps.version.outputs.version }} ./src --output Cs2PracticeMode
+
+      - name: generate asset name
+        id: asset-name
+        run: echo "NAME=cs2-practice-mode-${{ steps.version.outputs.version }}.tar.gz" >> $GITHUB_OUTPUT
+
+      - name: prepare release artifact
+        run: tar -czvf ${{ steps.asset-name.outputs.NAME }} Cs2PracticeMode
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.asset-name.outputs.NAME }}
+          path: ${{ steps.asset-name.outputs.NAME }}
+
+      - name: release
+        uses: softprops/action-gh-release@v2
+        with:
           fail_on_unmatched_files: true
-          files: ${{ steps.linux-asset-name.outputs.NAME }}
+          files: ${{ steps.asset-name.outputs.NAME }}
           tag_name: ${{ steps.version.outputs.version }}
