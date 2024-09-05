@@ -43,6 +43,12 @@ storage folder or switch to postgres by providing a connection string.
 
 ## Commands
 
+> All commands need to be prefixed with
+> the [PublicChatTrigger](https://docs.cssharp.dev/docs/reference/core-configuration.html#publicchattrigger).<br/>
+> By default, the [PublicChatTrigger](https://docs.cssharp.dev/docs/reference/core-configuration.html#publicchattrigger)
+> is `!`.<br/>
+> For example: `!spawn 1`
+
 | Server                                 |                                           |
 |----------------------------------------|-------------------------------------------|
 | help                                   | Print all available commands              |
