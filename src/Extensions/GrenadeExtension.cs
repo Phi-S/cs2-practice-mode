@@ -47,13 +47,13 @@ public static class GrenadeExtension
     }
 
 
-    // https://github.com/zwolof/cs2-executes/blob/321f329bacd8ab0a4ddfafc10d8f62741748b3ac/Memory.cs#L6
+    // https://github.com/zwolof/cs2-executes/blob/186d3d23e22d6a6c06bd8534430c0c9dff24be68/Memory.cs
     private static readonly MemoryFunctionWithReturn<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int,
             CSmokeGrenadeProjectile>
         CSmokeGrenadeProjectileCreateFunc = new(
             Environment.OSVersion.Platform == PlatformID.Unix
-                ? @"\x55\x4C\x89\xC1\x48\x89\xE5\x41\x57\x41\x56\x49\x89\xD6"
-                : @"\x48\x89\x5C\x24\x2A\x48\x89\x6C\x24\x2A\x48\x89\x74\x24\x2A\x57\x41\x56\x41\x57\x48\x83\xEC\x50\x4C\x8B\xB4\x24"
+                ? @"55 4C 89 C1 48 89 E5 41 57 45 89 CF 41 56 49 89 FE"
+                : @"48 8B C4 48 89 58 ? 48 89 68 ? 48 89 70 ? 57 41 56 41 57 48 81 EC ? ? ? ? 48 8B B4 24 ? ? ? ? 4D 8B F8"
         );
 
 

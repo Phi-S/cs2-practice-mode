@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Events;
 using Cs2PracticeMode.Constants;
 using Cs2PracticeMode.Services._1.AliasStorageFolder;
 using Cs2PracticeMode.Services._2.MessagingFolder;

@@ -7,16 +7,16 @@
 ### Download and install [Metamod](https://www.sourcemm.net/downloads.php/?branch=master)
 
 - [How to install Metamod](https://wiki.alliedmods.net/Installing_Metamod:Source)
-- <em>Tested with version 2.0.0-git1314</em>
+- <em>Tested with version 2.0.0-git1382</em>
 
 ### Download and install [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp/releases)
-
+    
 - [How to install CounterStrikeSharp](https://docs.cssharp.dev/docs/guides/getting-started.html)
-- <em>Tested with the version v272</em>
+- <em>Tested with version 1.0.356</em>
 
 ### Download and install [cs2-practice-mode](https://github.com/Phi-S/cs2-practice-mode)
 
-- Download the latest version of [here](https://github.com/Phi-S/cs2-practice-mode/releases)
+- Download the latest version [here](https://github.com/Phi-S/cs2-practice-mode/releases)
 - Extract folder
 - Move the extracted folder in `/game/csgo/addons/counterstrikesharp/plugins`.
 
@@ -27,7 +27,7 @@
 The storage destination of saved grenades/settings etc. can be set to either local storage or postgres.
 
 If nothing is specified, the plugin is using local storage.
-All stored jsons will be put in the plugin default storage
+All stored JSONs will be put in the plugin default storage
 folder `/game/csgo/addons/counterstrikesharp/plugins/Cs2PracticeMode/storage`.
 
 You can use the `DataLocation` setting in
@@ -48,8 +48,8 @@ The default config should automatically be created at
 
 | Option              | Default value                   | Description                                                                                                                                                                                                                                                                                                                                                            | 
 |---------------------|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ChatPrefix`        | `[\u0007Cs2PracticeMode]\u0001` | The prefix in front of chat messages send by the plugin                                                                                                                                                                                                                                                                                                                |
-| `EnablePermissions` | `false`                         | If set to true, it enables the [permission system](#permissions). With the permission system enabled no one on the server got access to any command unless defined with the [permission system](#permissions) system. <br/> If set to false, every player on the server got root permissions and can use any command without restrictions (except fake rcon commands). |
+| `ChatPrefix`        | `[\u0007Cs2PracticeMode]\u0001` | The prefix in front of chat messages sent by the plugin                                                                                                                                                                                                                                                                                                                |
+| `EnablePermissions` | `false`                         | If set to true, it enables the [permission system](#permissions). With the permission system enabled no one on the server has access to any command unless defined with the [permission system](#permissions) system. <br/> If set to false, every player on the server has root permissions and can use any command without restrictions (except fake rcon commands). |
 | `EnableFakeRcon`    | `false`                         | If set to true, it enables the ability to execute rcon [commands](#commands) via chat message. <br/> `rcon [command(Any)]`                                                                                                                                                                                                                                             |
 | `FakeRconPassword`  | ``                              | The password you need to login for fake rcon commands. `rconlogin [fake rcon password(String)]`. <br/> After login you can send rcon command with `rcon [command(Any)]`                                                                                                                                                                                                |
 | `DataLocation`      | ``                              | The custom data location for saved settings, grenades etc. If empty the [default storage folder](#storage) will be used.                                                                                                                                                                                                                                               |
@@ -68,16 +68,16 @@ The default config should automatically be created at
 | help [command(String)]                 | Print help for command                    |
 | map [map(String)]                      | Change map                                |
 | settings                               | Opens the settings menu                   |
-| rconlogin [fake rcon password(String)] | Login to get temporally admin permissions |
+| rconlogin [fake rcon password(String)] | Login to get temporary admin permissions |
 | rcon [command(Any)]                    | Executes a rcon command                   |
 
 | Grenades                       |                                                                                                           |
 |--------------------------------|-----------------------------------------------------------------------------------------------------------|
 | rethrow                        | Rethrows the last thrown grenade                                                                          |
 | last                           | Teleports to the last thrown grenade position                                                             |
-| back                           | Teleports to the previous grenade in the list of thrown grenade                                           |
+| back                           | Teleports to the previous grenade in the list of thrown grenades                                          |
 | back [amount(UInt)]            | Moves [amount] position backward in the list of thrown grenades and teleports to the grenade at that spot |
-| forward                        | Teleports to next grenade in the list of thrown grenade                                                   |
+| forward                        | Teleports to next grenade in the list of thrown grenades                                                  |
 | forward [amount(UInt)]         | Moves [amount] position forward in the list of thrown grenades and teleports to the grenade at that spot  |
 | nades                          | Open global grenade menu                                                                                  |
 | save [name(String)]            | Saves the last thrown grenade                                                                             |
@@ -116,7 +116,7 @@ The default config should automatically be created at
 |--------------------------------|------------------------------------------------------------|
 | spawn [spawn number(UInt)]     | Teleport to spawn                                          |
 | tspawn [t spawn number(UInt)]  | Teleport to t spawn                                        |
-| ctspawn [t spawn number(UInt)] | Teleport to ct spawn                                       |
+| ctspawn [ct spawn number(UInt)] | Teleport to ct spawn                                       |
 | bestspawn                      | Teleport to the best spawn based on your current position  |
 | worstspawn                     | Teleport to the worst spawn based on your current position |
 
