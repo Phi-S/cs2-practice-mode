@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using Cs2PracticeMode.Constants;
+using Cs2PracticeMode.Extensions;
 using Cs2PracticeMode.Services._1.GrenadeStorageFolder;
 using Cs2PracticeMode.Services._2.CommandFolder;
 using Cs2PracticeMode.Services._3.LastThrownGrenadeFolder;
@@ -59,6 +60,12 @@ public partial class GrenadeMenuService
             }
 
             grenadeToThrow = getResult.Value;
+        }
+
+        var throwGrenade = grenadeToThrow.ThrowGrenade(player);
+        if (throwGrenade.IsError)
+        {
+            return throwGrenade.Errors;
         }
 
         // Adds the thrown grenade to the last thrown grenades so !rethrow and !last is working
